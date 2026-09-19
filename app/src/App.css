@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  direction: rtl;
+}
+
+body {
+  background-color: black;
+}
