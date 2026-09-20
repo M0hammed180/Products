@@ -45,7 +45,7 @@ export default function Login() {
 
   return (
     <div>
-      <div className="flex min-h-screen justify-center px-4 py-10 bg-zinc-50 dark:bg-zinc-950 sm:px-6 lg:px-8">
+      <div className="pt-25 flex min-h-screen justify-center px-4 py-10 bg-zinc-50 dark:bg-zinc-950 sm:px-6 lg:px-8">
         <div className="w-full  lg:w-1/2 flex items-center justify-center">
           <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
             <h1 className="mb-6 text-center text-3xl font-semibold text-zinc-800 dark:text-zinc-100">

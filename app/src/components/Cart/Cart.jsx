@@ -6,6 +6,13 @@ import { setCartCount } from "../../Redux/pageSlice";
 import { Link, useNavigate } from "react-router-dom";
 import WhatsAppButton from "../Elements/WhatsAppButton";
 import { productWhatsAppMessage } from "../../utils/whatsapp";
+import {
+  getGuestCart,
+  setGuestCartItem,
+  removeGuestCartItem,
+  addGuestFavourite,
+} from "../../utils/guestCart";
+import { FaPhone } from "react-icons/fa";
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -17,6 +24,9 @@ export default function Cart() {
   const [orderError, setOrderError] = useState("");
   const { userId, isAuthenticated } = useSelector((state) => state.user);
 
+  // مسجل دخول ولا زائر
+  const isLoggedIn = Boolean(isAuthenticated && userId);
+
   const subtotal = cart.reduce((acc, item) => {
     if (item.productId?.price) return acc + item.productId.price * item.count;
     return acc;
@@ -27,17 +37,53 @@ export default function Cart() {
   const validCartItems = cart.filter((item) => item.productId);
 
   useEffect(() => {
-    if (!isAuthenticated || !userId) return;
+    if (isLoggedIn) {
+      api
+        .get(`cart/mycartpro/${userId}`)
+        .then((response) => {
+          if (response.data.myCart)
+            setCart(response.data.myCart.products || []);
+        })
+        .catch((error) => console.log("Error fetching cart", error));
+      return;
+    }
 
-    api
-      .get(`cart/mycartpro/${userId}`)
-      .then((response) => {
-        if (response.data.myCart) setCart(response.data.myCart.products || []);
-      })
-      .catch((error) => console.log("Error fetching cart", error));
-  }, [isAuthenticated, userId]);
+    const guestCart = getGuestCart(); // { [productId]: count }
+    const productIds = Object.keys(guestCart);
+
+    if (productIds.length === 0) {
+      setCart([]);
+      return;
+    }
+
+    Promise.all(
+      productIds.map((id) =>
+        api
+          .get(`product/product_no_login/${id}`) // TODO: غيّر اسم الراوت ده لو مختلف عندك
+          .then((res) => ({
+            productId: res.data.productDea,
+            count: guestCart[id],
+          }))
+          .catch(() => null),
+      ),
+    ).then((items) => {
+      setCart(items.filter(Boolean));
+    });
+  }, [isLoggedIn, userId]);
 
   const editCountCart = async (type, id) => {
+    if (!isLoggedIn) {
+      setCart((prevItems) =>
+        prevItems.map((item) => {
+          if (item.productId?._id !== id) return item;
+          const newCount =
+            type === "increase" ? item.count + 1 : item.count - 1;
+          setGuestCartItem(id, newCount);
+          return { ...item, count: newCount };
+        }),
+      );
+      return;
+    }
     try {
       await api.post("cart/edit", { productId: id, userId, type });
       setCart((prevItems) =>
@@ -55,6 +101,12 @@ export default function Cart() {
   };
 
   const deleteProfromCart = async (id) => {
+    if (!isLoggedIn) {
+      removeGuestCartItem(id);
+      setCart((prev) => prev.filter((item) => item.productId?._id !== id));
+      dispatch(setCartCount(Math.max(0, cartCount - 1)));
+      return;
+    }
     try {
       await api.post("cart/delete", { productId: id, userId });
       setCart((prev) => prev.filter((item) => item.productId?._id !== id));
@@ -65,6 +117,10 @@ export default function Cart() {
   };
 
   const placeOrder = async () => {
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
     if (!validCartItems.length || submitting) return;
 
     setSubmitting(true);
@@ -114,6 +170,11 @@ export default function Cart() {
 
   //favourites
   const addtoFavourites = async (id) => {
+    if (!isLoggedIn) {
+      addGuestFavourite(id);
+      deleteProfromCart(id);
+      return;
+    }
     try {
       await api.post("favourites/add", {
         productId: id,
@@ -237,7 +298,13 @@ export default function Cart() {
                               })}
                               className="whitespace-nowrap"
                             ></WhatsAppButton>
-
+                            <a
+                              href="tel:01200105320"
+                              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 "
+                            >
+                              <FaPhone className="h-5 w-5" aria-hidden="true" />
+                              <span>الاتصال عبر الهاتف</span>
+                            </a>
                             <FavButton
                               product={item.productId}
                               className="whitespace-nowrap"
@@ -273,11 +340,11 @@ export default function Cart() {
                             {item.productId.name}
                           </h2>
                           <p className="mt-1 text-sm text-zinc-400">
-                            ${item.productId.price} للقطعة
+                            ج.م.{item.productId.price} للقطعة
                           </p>
                         </div>
                         <p className="mt-2 text-lg font-bold text-white">
-                          ${(item.productId.price * item.count).toFixed(2)}
+                          ج.م.{(item.productId.price * item.count).toFixed(2)}
                         </p>
                       </div>
                     </Link>
@@ -295,6 +362,13 @@ export default function Cart() {
                     >
                       التحدث بخصوص المنتج
                     </WhatsAppButton>
+                    <a
+                      href="tel:01200105320"
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 mt-3 w-full"
+                    >
+                      <FaPhone className="h-5 w-5" aria-hidden="true" />
+                      <span>الاتصال عبر الهاتف</span>
+                    </a>
                     <FavButton
                       className="mt-3 w-full"
                       product={item.productId}
@@ -313,31 +387,37 @@ export default function Cart() {
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between gap-4 text-zinc-300">
               <dt>الإجمالي الفرعي</dt>
-              <dd>${subtotal.toFixed(2)}</dd>
+              <dd>ج.م.{subtotal.toFixed(2)}</dd>
             </div>
             {subtotal > 0 && (
               <div className="flex justify-between gap-4 text-zinc-300">
                 <dt>الشحن</dt>
-                <dd>${shipping.toFixed(2)}</dd>
+                <dd>ج.م.{shipping.toFixed(2)}</dd>
               </div>
             )}
             {discount > 0 && (
               <div className="flex justify-between gap-4 text-amber-400">
                 <dt>الخصم</dt>
-                <dd>-${discount.toFixed(2)}</dd>
+                <dd>-ج.م.{discount.toFixed(2)}</dd>
               </div>
             )}
           </dl>
           <div className="mt-5 flex justify-between gap-4 border-t border-zinc-700 pt-4 text-lg font-bold">
             <span>الإجمالي</span>
-            <span>${total.toFixed(2)}</span>
+            <span>ج.م.{total.toFixed(2)}</span>
           </div>
           <button
-            onClick={() => setShowConfirmModal(true)}
+            onClick={() => {
+              if (!isLoggedIn) {
+                navigate("/login");
+                return;
+              }
+              setShowConfirmModal(true);
+            }}
             disabled={validCartItems.length === 0}
             className="mt-6 min-h-12 w-full rounded-xl bg-amber-400 px-4 py-3 font-semibold text-black transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            تأكيد الطلب
+            {isLoggedIn ? "تأكيد الطلب" : "سجل دخول عشان تكمل الطلب"}
           </button>
         </aside>
       </div>
@@ -347,7 +427,7 @@ export default function Cart() {
           <div className="w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-800 p-5 text-white shadow-2xl sm:p-6">
             <h2 className="text-xl font-bold">تأكيد الطلب</h2>
             <p className="mt-3 text-sm leading-6 text-zinc-400">
-              هل تريد إنشاء الطلب بإجمالي ${total.toFixed(2)}؟
+              هل تريد إنشاء الطلب بإجمالي ج.م.{total.toFixed(2)}؟
             </p>
             {orderError && (
               <p className="mt-3 text-sm text-red-300">{orderError}</p>

@@ -19,13 +19,18 @@ export default function EditUser() {
   const [preview, setPreview] = useState(DEFAULT_AVATAR);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const { userId } = useSelector((state) => state.user);
+  const { userId, isAuthenticated } = useSelector((state) => state.user);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await api.get(`user/${userId}`);
         const user = response.data.user;
-console.log(user);
+        console.log(user);
 
         setFormData({
           name: user.name || "",
@@ -92,7 +97,9 @@ console.log(user);
   return (
     <div className="min-h-screen bg-black px-4 pb-10 pt-28 sm:px-6 sm:pt-32 lg:px-8">
       <div className="mx-auto w-full max-w-lg rounded-3xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
-        <h1 className="mb-6 text-2xl font-bold text-white">تعديل الملف الشخصي</h1>
+        <h1 className="mb-6 text-2xl font-bold text-white">
+          تعديل الملف الشخصي
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <label

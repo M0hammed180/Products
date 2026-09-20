@@ -8,6 +8,7 @@ import socket from "../../api/socket";
 import { useSelector } from "react-redux";
 import WhatsAppButton from "../Elements/WhatsAppButton";
 import { orderWhatsAppMessage } from "../../utils/whatsapp";
+import { FaPhone } from "react-icons/fa";
 
 const OrderPage = () => {
   const [message, setMessage] = useState("");
@@ -91,73 +92,16 @@ const OrderPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black px-4 pb-8 pt-28 text-zinc-200 sm:px-6 sm:pt-32 lg:px-8">
+    <div className="not-md:min-h-screen md:h-screen bg-black px-4  pt-28 text-zinc-200 sm:px-6 py-7 ">
       <div className="mx-auto max-w-7xl">
-        {/* =========================
-            ORDER PROGRESS
-        ========================== */}
-        <div className="mb-6 rounded-3xl bg-zinc-800 p-5 sm:p-7">
-          <div className="mb-6 flex items-center gap-3">
-            <Package size={24} />
-            <h1 className="text-xl font-bold sm:text-2xl">حالة الطلب</h1>
-          </div>
-
-          <div className="relative">
-            {/* Background Line */}
-            <div className="absolute left-[10%] right-[10%] top-5 h-1 bg-zinc-700" />
-
-            {/* Progress Line */}
-            <div
-              className="absolute left-[10%] top-5 h-1 bg-zinc-200 transition-all duration-500"
-              style={{
-                width:
-                  currentStep <= 0
-                    ? "0%"
-                    : `${(currentStep / (statusSteps.length - 1)) * 80}%`,
-              }}
-            />
-
-            <div className="relative flex justify-between">
-              {statusSteps.map((status, index) => {
-                const completed = index <= currentStep;
-
-                return (
-                  <div
-                    key={status}
-                    className="flex w-1/3 flex-col items-center"
-                  >
-                    <div
-                      className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold transition-all duration-300 ${
-                        completed
-                          ? "border-zinc-200 bg-zinc-200 text-black"
-                          : "border-zinc-600 bg-zinc-800 text-zinc-500"
-                      }`}
-                    >
-                      {index + 1}
-                    </div>
-
-                    <span
-                      className={`mt-3 text-sm font-semibold capitalize sm:text-base ${
-                        completed ? "text-zinc-200" : "text-zinc-500"
-                      }`}
-                    >
-                      {status}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
         {/* =========================
             MAIN CONTENT
         ========================== */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* =========================
-              LEFT - PRODUCTS
+              LEFT - PRODUCTSE
           ========================== */}
-          <div className="rounded-3xl bg-zinc-800 p-4 sm:p-6">
+          <div className=" rounded-3xl bg-zinc-800 p-4 sm:p-6">
             <div className="mb-5">
               <h2 className="text-xl font-bold sm:text-2xl">المنتجات</h2>
 
@@ -207,7 +151,7 @@ const OrderPage = () => {
                           </span>
                         </span>
 
-                        <span className="font-bold">${productPrice}</span>
+                        <span className="font-bold">ج.م.{productPrice}</span>
                       </div>
                     </div>
                   </div>
@@ -219,25 +163,30 @@ const OrderPage = () => {
             <div className="mt-6 flex items-center justify-between border-t border-zinc-700 pt-5">
               <span className="text-lg font-semibold">الإجمالي</span>
 
-              <span className="text-2xl font-bold">${order?.price}</span>
+              <span className="text-2xl font-bold">ج.م.{order?.price}</span>
             </div>
           </div>
 
           {/* =========================
-              RIGHT SIDE
-          ========================== */}
-          <div className="flex min-h-150 flex-col gap-6">
-            {/* =========================
-                ORDER INFORMATION
-            ========================== */}
-          
-
-            {/* =========================
                 CHAT
             ========================== */}
-            <div className="flex min-h-100 flex-1 flex-col overflow-hidden rounded-3xl bg-zinc-800">
+          <div className="">
+            <WhatsAppButton
+              message={orderWhatsAppMessage(order)}
+              className="mb-4 w-full"
+            >
+              التحدث بخصوص الطلب
+            </WhatsAppButton>
+            <a
+              href="tel:+201200105320"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 mb-4 w-full"
+            >
+              <FaPhone className="h-5 w-5" aria-hidden="true" />
+              <span>الاتصال عبر الهاتف</span>
+            </a>
+            <div className="flex min-h-120  flex-col overflow-hidden rounded-3xl bg-zinc-800 ">
               {/* Chat Header */}
-              <div className="border-b border-zinc-700 p-4 sm:p-5">
+              <div className="border-b border-zinc-700 p-4">
                 <h2 className="text-lg font-bold sm:text-xl">محادثة الطلب</h2>
 
                 <p className="text-sm text-zinc-500">تواصل مع المتجر</p>

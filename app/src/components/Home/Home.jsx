@@ -56,11 +56,11 @@ export default function Home() {
     cartProductIds,
     favouritesProductIds,
   } = useSelector((state) => state.page);
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-    }
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate("/login");
+  //   }
+  // }, [isAuthenticated]);
 
   //products
   const fetchProducts = async () => {
@@ -78,10 +78,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchProducts();
-    }
-  }, [isAuthenticated]);
+    fetchProducts();
+  }, []);
 
   const scrollProducts = (direction) => {
     productsRef.current?.scrollBy({
@@ -89,6 +87,7 @@ export default function Home() {
       behavior: "smooth",
     });
   };
+
   return (
     <>
       <section className="min-h-screen w-full bg-black pt-13 sm:pt-28">
@@ -179,7 +178,7 @@ export default function Home() {
                   className="mt-0 flex items-center rounded-full bg-zinc-600/50 px-3 py-2 text-xs font-medium uppercase text-white backdrop-blur-md hover:bg-zinc-500/50 focus:outline-none"
                 >
                   <span>تصفح الكل </span>
-             <ArrowLeft />
+                  <ArrowLeft />
                 </Link>
               </div>
             </div>

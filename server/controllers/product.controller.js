@@ -180,6 +180,46 @@ const showProductDetails = asyncWrapper(async (req, res) => {
   });
 });
 
+const showProductDetailsNoLogin = asyncWrapper(async (req, res) => {
+  const id = req.params.id;
+
+  const productDea = await product.findById(id);
+  const sameProducts = await product
+    .find({ category: productDea.category })
+    .limit(6);
+
+  if (!productDea) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    productDea,
+    sameProducts,
+  });
+});
+
+const showProductinNoLogin = asyncWrapper(async (req, res) => {
+  const id = req.params.id;
+
+  const productDea = await product.findById(id);
+
+  if (!productDea) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    productDea,
+  });
+});
+
 const trackProductEvent = asyncWrapper(async (req, res) => {
   const { type, productId, userId } = req.body;
 
@@ -439,4 +479,6 @@ module.exports = {
   trackProductEvent,
   analytics,
   getMostPopularProducts,
+  showProductinNoLogin,
+  showProductDetailsNoLogin,
 };

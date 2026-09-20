@@ -9,6 +9,15 @@ import ProductCard from "../Elements/ProductCard";
 import StarRating from "../Elements/StarRating";
 import WhatsAppButton from "../Elements/WhatsAppButton";
 import { productWhatsAppMessage } from "../../utils/whatsapp";
+import {
+  addGuestFavourite,
+  getGuestCart,
+  isGuestFavourite,
+  removeGuestCartItem,
+  removeGuestFavourite,
+  setGuestCartItem,
+} from "../../utils/guestCart";
+import { FaPhone } from "react-icons/fa";
 
 const starPath =
   "M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z";
@@ -51,6 +60,7 @@ export default function ProductDetail() {
   const dispatch = useDispatch();
   const { cartCount } = useSelector((state) => state.page);
   const [selectedImage, setSelectedImage] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
@@ -124,14 +134,37 @@ export default function ProductDetail() {
   //product
   const fetchProduct = async () => {
     try {
-      setLoading(true);
-      const response = await api.get(`product/product_detail/${id}/${userId}`);
-      setProduct(response.data.productDea);
-      setCartData({
-        isinCart: response.data.isinCart,
-        count: response.data.count,
-      });
-      setProducts(response.data.sameProducts);
+      if (userId) {
+        setLoading(true);
+        const response = await api.get(
+          `product/product_detail/${id}/${userId}`,
+        );
+        setProduct(response.data.productDea);
+        setCartData({
+          isinCart: response.data.isinCart,
+          count: response.data.count,
+        });
+        setProducts(response.data.sameProducts);
+      } else {
+        setLoading(true);
+        const response = await api.get(`product/product_detail_no_login/${id}`);
+        setProduct(response.data.productDea);
+        const guestCart = await getGuestCart();
+        const cartArray = Object.entries(guestCart).map(
+          ([productId, count]) => ({
+            productId,
+            count,
+          }),
+        );
+        const cartItem = cartArray.find((item) => item.productId === id);
+        const isProductInCart = !!cartItem;
+        const productCount = cartItem ? cartItem.count : 0;
+        setCartData({
+          isinCart: isProductInCart,
+          count: productCount,
+        });
+        setProducts(response.data.sameProducts);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -141,6 +174,12 @@ export default function ProductDetail() {
 
   //cart
   const addtoCart = async () => {
+    if (!userId) {
+      setGuestCartItem(id, count);
+      setCartData({ count: count, isinCart: true });
+      dispatch(setCartCount(cartCount + 1));
+      return;
+    }
     try {
       await api.post("cart/add", {
         productId: id,
@@ -155,6 +194,14 @@ export default function ProductDetail() {
   };
 
   const editCountCart = async (type) => {
+    if (!userId) {
+      setCartData((prev) => {
+        const newCount = type === "increase" ? prev.count + 1 : prev.count - 1;
+        setGuestCartItem(id, newCount);
+        return { ...prev, count: newCount };
+      });
+      return;
+    }
     try {
       await api.post("cart/edit", {
         productId: id,
@@ -172,6 +219,12 @@ export default function ProductDetail() {
   };
 
   const deleteProfromCart = async () => {
+    if (!userId) {
+      removeGuestCartItem(id);
+      setCartData((prev) => ({ ...prev, isinCart: false }));
+      dispatch(setCartCount(cartCount - 1));
+      return;
+    }
     try {
       await api.post("cart/delete", {
         productId: id,
@@ -185,6 +238,11 @@ export default function ProductDetail() {
   };
 
   const addtoFavourites = async () => {
+    if (!userId) {
+      addGuestFavourite(id);
+      dispatch(setFavouritesProductIds([...favouritesProductIds, id]));
+      return;
+    }
     try {
       await api.post("favourites/add", { productId: id, userId });
       dispatch(setFavouritesProductIds([...favouritesProductIds, id]));
@@ -194,6 +252,15 @@ export default function ProductDetail() {
   };
 
   const deleteProfromFavourites = async () => {
+    if (!userId) {
+      removeGuestFavourite(id);
+      dispatch(
+        setFavouritesProductIds(
+          favouritesProductIds.filter((item) => item !== id),
+        ),
+      );
+      return;
+    }
     try {
       await api.post("favourites/delete", { productId: id, userId });
       dispatch(
@@ -215,8 +282,10 @@ export default function ProductDetail() {
 
   useEffect(() => {
     fetchProduct();
-    fetchComments();
-  }, [id]);
+    if (userId) {
+      fetchComments();
+    }
+  }, [id, userId]);
 
   if (loading) return <Loading />;
 
@@ -225,13 +294,18 @@ export default function ProductDetail() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 md:flex-row">
           <div className="flex-1">
-            <div className="mb-4 flex h-64 items-center justify-center rounded-lg bg-zinc-900 md:h-80">
+            <button
+              type="button"
+              onClick={() => setShowPreview(true)}
+              aria-label="تكبير صورة المنتج"
+              className="mb-4 flex h-64 w-full cursor-zoom-in items-center justify-center rounded-lg bg-zinc-900 md:h-80"
+            >
               <img
                 className="h-full w-full object-contain"
                 src={selectedImage || product?.images?.[0]}
                 alt={product?.name || "Product"}
               />
-            </div>
+            </button>
             <div className="mb-4 flex gap-3 overflow-x-auto">
               {product?.images?.map((image) => (
                 <button
@@ -253,23 +327,14 @@ export default function ProductDetail() {
             <h2 className="mb-2 text-2xl font-bold leading-tight text-white md:text-3xl">
               {product.name}
             </h2>
-            <div className="flex items-center gap-2">
-              <p className="font-sans antialiased text-base text-zinc-200 font-semibold">
-                {product.ratingAverage}
-              </p>
-              <StarRating rating={product.ratingAverage} />
-              <p className="font-sans antialiased text-base text-stone-800 dark:text-white font-semibold">
-                بناءً على {product.ratingCount} تقييم
-              </p>
-            </div>
 
             <div className="my-4 flex items-center gap-2">
               <span className="rounded-lg bg-white px-3 py-2 text-3xl font-bold text-zinc-950">
-                ${product.discountPrice || product.price}
+                ج.م.{product.discountPrice || product.price}
               </span>
               {product.discountPrice && (
                 <span className="text-lg text-zinc-500 line-through">
-                  ${product.price}
+                  ج.م.{product.price}
                 </span>
               )}
             </div>
@@ -388,7 +453,7 @@ export default function ProductDetail() {
               </div>
             )}
             <div className=" flex flex-col gap-4 sm:flex-row">
-              {favouritesProductIds.includes(id) ? (
+              {isGuestFavourite(id) ? (
                 <button
                   type="button"
                   onClick={deleteProfromFavourites}
@@ -417,10 +482,18 @@ export default function ProductDetail() {
               >
                 التحدث بخصوص المنتج
               </WhatsAppButton>
+              <a
+                href="tel:01200105320"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 mb-4 w-full"
+              >
+                <FaPhone className="h-5 w-5" aria-hidden="true" />
+                <span>الاتصال عبر الهاتف</span>
+              </a>
             </div>
           </div>
         </div>
       </div>
+      {/* products */}
       <section className="my-10 px-4 sm:px-6 lg:px-10">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
@@ -491,7 +564,7 @@ export default function ProductDetail() {
           })}
         </div>
       </section>
-      <section className="mt-10 w-full space-y-6 px-4 pb-10 sm:px-6 lg:px-8">
+      {/* <section className="mt-10 w-full space-y-6 px-4 pb-10 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between border-b border-zinc-700 pb-4">
           <div>
             <h2 className="text-xl font-semibold text-white">التعليقات</h2>
@@ -669,7 +742,28 @@ export default function ProductDetail() {
             );
           })}
         </div>
-      </section>
+      </section> */}
+
+      {showPreview && (
+        <div
+          onClick={() => setShowPreview(false)}
+          className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/90 p-4"
+        >
+          <img
+            src={selectedImage || product?.images?.[0]}
+            alt={product?.name || "Product"}
+            className="max-h-full max-w-full object-contain"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPreview(false)}
+            aria-label="إغلاق"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900/80 text-2xl text-white"
+          >
+            &times;
+          </button>
+        </div>
+      )}
     </div>
   );
 }
