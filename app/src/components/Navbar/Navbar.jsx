@@ -800,32 +800,36 @@ export default function Navbar() {
                     <div className="absolute left-0 top-full mt-4 w-80 max-w-[calc(100vw-1.5rem)]">
                       <div className="rounded-2xl border border-white/15 bg-zinc-800 p-3 shadow-xl ">
                         <div className="grid grid-cols-1 gap-2 ">
-                          <Link
-                            to="/edit_profile"
-                            className="rounded-xl p-2 text-zinc-800 transition hover:bg-amber-400/20 flex gap-2 items-center"
-                            onClick={() => setProfile(false)}
-                          >
-                            <img
-                              src={avatar}
-                              className="h-10 w-10 rounded-full"
-                            />
-                            <p className="font-semibold text-sm text-white uppercase">
-                              {userName}
-                            </p>
-                          </Link>
-
-                          {/* Orders */}
-                          <Link
-                            to="/orders"
-                            className={
-                              userNavLinkClass("/orders") +
-                              " flex items-center gap-2"
-                            }
-                            onClick={() => setProfile(false)}
-                          >
-                            <ReceiptItem />
-                            طلباتي
-                          </Link>
+                          {userId && (
+                            <>
+                              {" "}
+                              <Link
+                                to="/edit_profile"
+                                className="rounded-xl p-2 text-zinc-800 transition hover:bg-amber-400/20 flex gap-2 items-center"
+                                onClick={() => setProfile(false)}
+                              >
+                                <img
+                                  src={avatar}
+                                  className="h-10 w-10 rounded-full"
+                                />
+                                <p className="font-semibold text-sm text-white uppercase">
+                                  {userName}
+                                </p>
+                              </Link>
+                              {/* Orders */}
+                              <Link
+                                to="/orders"
+                                className={
+                                  userNavLinkClass("/orders") +
+                                  " flex items-center gap-2"
+                                }
+                                onClick={() => setProfile(false)}
+                              >
+                                <ReceiptItem />
+                                طلباتي
+                              </Link>
+                            </>
+                          )}
 
                           {/* Favourites */}
                           <Link
@@ -838,13 +842,38 @@ export default function Navbar() {
                           >
                             <HeartCircle3 /> المفضلة
                           </Link>
-                          {/* Logout */}
-                          <button
-                            onClick={logOut}
-                            className="rounded-full  px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800 bg-red-950"
-                          >
-                            تسجيل الخروج
-                          </button>
+                          {userId ? (
+                            <>
+                              {/* Logout */}
+                              <button
+                                onClick={() => {
+                                  logOut();
+                                  setProfile(false);
+                                }}
+                                className="rounded-full  px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800 bg-red-950"
+                              >
+                                تسجيل الخروج
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {" "}
+                              <Link
+                                to="/login"
+                                className={userNavLinkClass("/login")}
+                                onClick={() => setProfile(false)}
+                              >
+                                <Login6 /> تسجيل دخول
+                              </Link>{" "}
+                              <Link
+                                to="/register"
+                                className={userNavLinkClass("/register")}
+                                onClick={() => setProfile(false)}
+                              >
+                                <UserAdd4 /> انشاء حساب
+                              </Link>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

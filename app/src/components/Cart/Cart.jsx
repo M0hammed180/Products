@@ -303,7 +303,6 @@ export default function Cart() {
                               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 "
                             >
                               <FaPhone className="h-5 w-5" aria-hidden="true" />
-                              <span>الاتصال عبر الهاتف</span>
                             </a>
                             <FavButton
                               product={item.productId}
