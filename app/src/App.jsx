@@ -23,15 +23,20 @@ import Products from "./components/Products/Products";
 import ScrollToTop from "./components/Elements/ScrollToTop";
 import Order from "./components/Order/Order";
 import Breadcrumb from "./components/Elements/Breadcrumb";
+import AdminOrders from "./components/Admin/Orders/Orders";
 function AppContent() {
   const { role } = useSelector((state) => state.user);
 
   return (
-    <div className="relative min-h-screen bg-gray-200 text-right dark:bg-black" dir="rtl" lang="ar">
+    <div
+      className="relative min-h-screen bg-gray-200 text-right dark:bg-black"
+      dir="rtl"
+      lang="ar"
+    >
       <BrowserRouter>
         <ScrollToTop />
         <Navbar />
-        <Breadcrumb />
+        {role !== "admin" && <Breadcrumb />}
         <div className={role === "admin" ? "lg:mr-64" : ""}>
           <Routes>
             <Route
@@ -45,6 +50,7 @@ function AppContent() {
             <Route path="/users" element={<Users />} />
             <Route path="/products_admin" element={<AdminProducts />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/admin_orders" element={<AdminOrders />} />
             <Route path="/product_detail/:id" element={<ProductDetail />} />
             <Route path="/edit_product/:id" element={<EditProduct />} />
             <Route path="/edit_user/:id" element={<EditUser />} />

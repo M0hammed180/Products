@@ -61,10 +61,10 @@ export default function Products() {
             Shyaka collection
           </p> */}
           <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl capitalize">
-            {category === "tshirts"
-              ? "تيشيرتات"
-              : category === "pantalons"
-                ? "بناطيل"
+            {category === "clothes"
+              ? "ملابس"
+              : category === "electronics"
+                ? "اجهزة"
                 : category === "shoes"
                   ? "أحذية"
                   : "المنتجات"}
@@ -110,6 +110,7 @@ export default function Products() {
                     isinmyFavourites={isinmyFavourites}
                     ratingCount={product.ratingCount}
                     ratingAvg={product.ratingAverage}
+                    stock={product.stock}
                   />
                 </Link>
               );

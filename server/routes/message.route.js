@@ -6,5 +6,6 @@ const verifyToken = require("../middleware/verfiyToken");
 const messageController = require("../controllers/messages.controller");
 
 router.get("/:orderId", verifyToken, messageController.getMessages);
+router.get("/:orderId/:userId", verifyToken, messageController.unReadMessages);
 
 module.exports = router;

@@ -36,3 +36,5 @@ uploads/
 *.njsproj
 *.sln
 *.sw?
+app/src/components/api.jsx
+app/src/api/socket.js

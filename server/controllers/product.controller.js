@@ -4,29 +4,21 @@ const Review = require("../models/commentSchema");
 const asyncWrapper = require("../middleware/asyncWrapper");
 const { default: mongoose } = require("mongoose");
 const Cart = require("../models/cartSchema");
+const Order = require("../models/orderSchema");
 
 const addProduct = asyncWrapper(async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    discountPrice,
-    category,
-    stock,
-    isActive,
-    size,
-  } = req.body;
+  const { name, description, price, category, stock, size } = req.body;
 
   const images = req.files?.map((file) => file.path) || [];
 
   const newProduct = await product.create({
     name,
-    description,
+    description: description || "",
     price,
-    discountPrice,
+    discountPrice: 0,
     category,
     stock,
-    isActive,
+    isActive: true,
     images,
     size,
   });
@@ -125,6 +117,7 @@ const showProducts = asyncWrapper(async (req, res) => {
   const [products, totalProducts] = await Promise.all([
     product
       .find(query)
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit),
     product.countDocuments(query),
@@ -161,7 +154,7 @@ const showProductDetails = asyncWrapper(async (req, res) => {
 
   const productDea = await product.findById(id);
   const sameProducts = await product
-    .find({ category: productDea.category })
+    .find({ category: productDea.category, _id: { $ne: id } })
     .limit(6);
 
   if (!productDea) {
@@ -185,7 +178,7 @@ const showProductDetailsNoLogin = asyncWrapper(async (req, res) => {
 
   const productDea = await product.findById(id);
   const sameProducts = await product
-    .find({ category: productDea.category })
+    .find({ category: productDea.category, _id: { $ne: id } })
     .limit(6);
 
   if (!productDea) {
@@ -221,13 +214,24 @@ const showProductinNoLogin = asyncWrapper(async (req, res) => {
 });
 
 const trackProductEvent = asyncWrapper(async (req, res) => {
-  const { type, productId, userId } = req.body;
+  const { productId, userId } = req.body;
+  let existingEvent = null;
 
-  await ProductEvent.create({
-    product: productId,
-    user: userId || null,
-    type,
-  });
+  if (userId) {
+    existingEvent = await ProductEvent.findOne({
+      userId,
+      productId,
+      type: "product_view",
+    });
+  }
+
+  if (!existingEvent) {
+    await ProductEvent.create({
+      productId: productId,
+      userId: userId || null,
+      type: "product_view",
+    });
+  }
 
   res.status(201).json({
     message: "Event tracked successfully",
@@ -238,13 +242,13 @@ const analytics = asyncWrapper(async (req, res) => {
   const mostViewed = await ProductEvent.aggregate([
     {
       $match: {
-        type: "view",
+        type: "product_view",
       },
     },
 
     {
       $group: {
-        _id: "$product",
+        _id: "$productId",
         views: { $sum: 1 },
       },
     },
@@ -282,7 +286,7 @@ const analytics = asyncWrapper(async (req, res) => {
 
     {
       $group: {
-        _id: "$product",
+        _id: "$productId",
         addToCart: { $sum: 1 },
       },
     },
@@ -296,6 +300,19 @@ const analytics = asyncWrapper(async (req, res) => {
     {
       $limit: 10,
     },
+
+    {
+      $lookup: {
+        from: "products",
+        localField: "_id",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+
+    {
+      $unwind: "$product",
+    },
   ]);
 
   const mostAddedToFavorite = await ProductEvent.aggregate([
@@ -307,7 +324,7 @@ const analytics = asyncWrapper(async (req, res) => {
 
     {
       $group: {
-        _id: "$product",
+        _id: "$productId",
         wishlist: { $sum: 1 },
       },
     },
@@ -321,6 +338,19 @@ const analytics = asyncWrapper(async (req, res) => {
     {
       $limit: 10,
     },
+
+    {
+      $lookup: {
+        from: "products",
+        localField: "_id",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+
+    {
+      $unwind: "$product",
+    },
   ]);
 
   const bestSelling = await ProductEvent.aggregate([
@@ -332,8 +362,7 @@ const analytics = asyncWrapper(async (req, res) => {
 
     {
       $group: {
-        _id: "$product",
-
+        _id: "$productId",
         orders: {
           $sum: 1,
         },
@@ -349,49 +378,29 @@ const analytics = asyncWrapper(async (req, res) => {
     {
       $limit: 10,
     },
+
+    {
+      $lookup: {
+        from: "products",
+        localField: "_id",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+
+    {
+      $unwind: "$product",
+    },
   ]);
 
-  const topRated = await Review.aggregate([
+  const products = await ProductEvent.aggregate([
     {
       $group: {
         _id: "$productId",
 
-        averageRating: {
-          $avg: "$rating",
-        },
-
-        ratingsCount: {
-          $sum: 1,
-        },
-      },
-    },
-
-    {
-      $sort: {
-        averageRating: -1,
-        ratingsCount: -1,
-      },
-    },
-
-    {
-      $limit: 10,
-    },
-  ]);
-
-  res.status(201).json({
-    message: "Event tracked successfully",
-  });
-});
-
-const getMostPopularProducts = asyncWrapper(async (req, res) => {
-  const products = await ProductEvent.aggregate([
-    {
-      $group: {
-        _id: "$product",
-
         views: {
           $sum: {
-            $cond: [{ $eq: ["$type", "view"] }, 1, 0],
+            $cond: [{ $eq: ["$type", "product_view"] }, 1, 0],
           },
         },
 
@@ -403,7 +412,7 @@ const getMostPopularProducts = asyncWrapper(async (req, res) => {
 
         favorites: {
           $sum: {
-            $cond: [{ $eq: ["$type", "favorite"] }, 1, 0],
+            $cond: [{ $eq: ["$type", "wishlist"] }, 1, 0],
           },
         },
 
@@ -434,7 +443,7 @@ const getMostPopularProducts = asyncWrapper(async (req, res) => {
           $add: [
             { $multiply: ["$views", 1] },
             { $multiply: ["$addToCart", 3] },
-            { $multiply: ["$favorites", 2] },
+            { $multiply: ["$favorites", 5] },
             { $multiply: ["$orders", 10] },
           ],
         },
@@ -448,25 +457,80 @@ const getMostPopularProducts = asyncWrapper(async (req, res) => {
     },
 
     {
-      $limit: 10,
+      $limit: 9,
     },
 
     {
       $project: {
         _id: 0,
         product: 1,
-        views: 1,
-        addToCart: 1,
-        favorites: 1,
-        orders: 1,
+        score: {
+          views: "$views",
+          addToCart: "$addToCart",
+          favorites: "$favorites",
+          orders: "$orders",
+        },
         popularityScore: 1,
       },
     },
   ]);
 
-  res.status(200).json({
-    success: true,
+  const salesAnalytics = await Order.aggregate([
+    {
+      $unwind: "$products",
+    },
+
+    {
+      $group: {
+        _id: "$products.productId",
+
+        soldQuantity: {
+          $sum: "$products.count",
+        },
+      },
+    },
+
+    {
+      $project: {
+        _id: 0,
+        soldQuantity: 1,
+      },
+    },
+  ]);
+
+  const totalSalesAnalytics = salesAnalytics.reduce(
+    (acc, item) => {
+      acc.soldQuantity += item.soldQuantity || 0;
+      return acc;
+    },
+    {
+      soldQuantity: 0,
+    },
+  );
+
+  const totalSales = await Order.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalSales: {
+          $sum: "$price",
+        },
+      },
+    },
+  ]);
+
+  const orders = await Order.countDocuments();
+
+  res.status(201).json({
+    message: "Event tracked successfully",
+    mostViewed,
+    mostAddedToCart,
+    mostAddedToFavorite,
+    bestSelling,
     products,
+    totalSalesAnalytics,
+    totalSales,
+    orders,
   });
 });
 
@@ -478,7 +542,6 @@ module.exports = {
   showProductDetails,
   trackProductEvent,
   analytics,
-  getMostPopularProducts,
   showProductinNoLogin,
   showProductDetailsNoLogin,
 };

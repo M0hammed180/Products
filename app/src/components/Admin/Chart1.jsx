@@ -138,7 +138,7 @@ const SalesChart = () => {
   }, []);
 
   return (
-    <div className="w-8/12 px-2">
+    <div className="md:w-8/12 px-2">
       <div className="h-auto w-full rounded-3xl bg-zinc-900 py-6 text-white shadow-xs overflow-hidden">
         {/* Header */}
         <div className="flex justify-between px-5">

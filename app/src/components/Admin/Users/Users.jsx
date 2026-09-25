@@ -66,51 +66,35 @@ export default function Users() {
 
   return (
     <div>
-      <div className="flex flex-col">
+      {/* ================= DESKTOP TABLE ================= */}
+      <div className="hidden md:flex flex-col">
         <div className="overflow-x-auto sm:mx-0.5 lg:mx-0.5">
-          <div className="py-2 inline-block min-w-full ">
+          <div className="py-2 inline-block min-w-full">
             <div className="overflow-hidden">
               <table className="min-w-full border-separate border-spacing-y-2">
                 <thead className="border-b border-zinc-300 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950">
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100"
-                    >
+                    <th className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100">
                       Avatar
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100"
-                    >
+                    <th className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100">
                       Name
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100"
-                    >
+                    <th className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100">
                       Phone
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100"
-                    >
+                    <th className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100">
                       Email
-                    </th>{" "}
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100"
-                    >
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100">
                       Role
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100"
-                    >
+                    <th className="px-6 py-4 text-left text-sm font-medium text-zinc-900 dark:text-zinc-100">
                       Actions
                     </th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {users.map((p, index) => (
                     <tr
@@ -119,17 +103,16 @@ export default function Users() {
                         index % 2 === 0 ? "bg-zinc-700" : "bg-zinc-900"
                       }`}
                     >
-                      <td className="whitespace-nowrap rounded-l-lg px-6 py-4 text-sm font-medium">
+                      <td className="whitespace-nowrap rounded-r-lg px-6 py-4 text-sm font-medium">
                         <Link to={`/edit_user/${p._id}`}>
-                          <div className="flex gap-[0.5px]">
-                            <img
-                              src={p.avatar}
-                              className="w-5 h-5 rounded-full"
-                              alt=""
-                            />{" "}
-                          </div>
+                          <img
+                            src={p.avatar}
+                            className="h-8 w-8 rounded-full object-cover"
+                            alt=""
+                          />
                         </Link>
                       </td>
+
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-light">
                         <Link
                           to={`/edit_user/${p._id}`}
@@ -138,16 +121,20 @@ export default function Users() {
                           {p.name}
                         </Link>
                       </td>
+
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-light">
                         {p.phone}
                       </td>
+
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-light">
                         {p.email}
                       </td>
+
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-light">
                         {p.role}
                       </td>
-                      <td className="whitespace-nowrap rounded-r-lg px-6 py-4 text-sm font-light">
+
+                      <td className="whitespace-nowrap rounded-l-lg px-6 py-4 text-sm font-light">
                         <div className="flex gap-2">
                           <Link
                             to={`/edit_user/${p._id}`}
@@ -155,6 +142,7 @@ export default function Users() {
                           >
                             Edit
                           </Link>
+
                           <button
                             type="button"
                             className="rounded-md bg-red-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
@@ -172,11 +160,89 @@ export default function Users() {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between px-4 py-4 text-sm text-zinc-700 dark:text-zinc-300">
+
+      {/* ================= MOBILE CARDS ================= */}
+      <div className="md:hidden space-y-3 px-3 py-2 mt-5">
+        {users.map((p) => (
+          <div
+            key={p._id}
+            className="rounded-xl border border-zinc-700 bg-zinc-900 p-4 text-zinc-100 shadow-sm"
+          >
+            {/* User Header */}
+            <div className="flex items-center gap-3">
+              <Link to={`/edit_user/${p._id}`}>
+                <img
+                  src={p.avatar}
+                  className="h-12 w-12 rounded-full object-cover"
+                  alt=""
+                />
+              </Link>
+
+              <div className="min-w-0 flex-1">
+                <Link
+                  to={`/edit_user/${p._id}`}
+                  className="block truncate font-semibold hover:underline"
+                >
+                  {p.name}
+                </Link>
+
+                <span className="text-xs text-zinc-400">{p.role}</span>
+              </div>
+            </div>
+
+            {/* User Information */}
+            <div className="mt-4 space-y-2 border-t border-zinc-700 pt-3">
+              <div className="flex justify-between gap-4">
+                <span className="text-xs text-zinc-400">Phone</span>
+
+                <span className="max-w-[65%] truncate text-right text-sm">
+                  {p.phone}
+                </span>
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <span className="text-xs text-zinc-400">Email</span>
+
+                <span className="max-w-[65%] truncate text-right text-sm">
+                  {p.email}
+                </span>
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <span className="text-xs text-zinc-400">Role</span>
+
+                <span className="text-sm">{p.role}</span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-4 flex gap-2 border-t border-zinc-700 pt-3">
+              <Link
+                to={`/edit_user/${p._id}`}
+                className="flex-1 rounded-md bg-white px-3 py-2 text-center text-xs font-semibold text-zinc-950 hover:bg-zinc-200"
+              >
+                Edit
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => deleteUser(p._id)}
+                className="flex-1 rounded-md bg-red-900 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ================= PAGINATION ================= */}
+      <div className="flex flex-col gap-3 px-4 py-4 text-sm text-zinc-700 sm:flex-row sm:items-center sm:justify-between dark:text-zinc-300">
         <span>
           Page {pagination.page} of {pagination.totalPages} (
           {pagination.totalUsers} users)
         </span>
+
         <div className="flex gap-2">
           <button
             type="button"
@@ -186,6 +252,7 @@ export default function Users() {
           >
             Previous
           </button>
+
           <button
             type="button"
             disabled={page >= pagination.totalPages}

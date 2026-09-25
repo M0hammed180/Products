@@ -69,7 +69,6 @@ export default function ProductDetail() {
   const [count, setCount] = useState(1);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
-  const [startComment, setStartComment] = useState(false);
   const [cartData, setCartData] = useState({});
   const [products, setProducts] = useState([]);
   const productsRef = useRef(null);
@@ -86,48 +85,6 @@ export default function ProductDetail() {
       console.log(response.data.comments);
     } catch (error) {
       console.error("Error fetching Comments:", error);
-    }
-  };
-  const addComment = async (event) => {
-    event.preventDefault();
-    if (!commentText.trim() || !star) return;
-    try {
-      await api.post("comment", {
-        productId: id,
-        userId,
-        text: commentText,
-        star,
-      });
-      setCommentText("");
-      setStar(0);
-      fetchComments();
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    }
-  };
-  const handleDelete = async (commentId) => {
-    try {
-      await api.delete(`comment/${commentId}`);
-      setComments((current) =>
-        current.filter((comment) => comment._id !== commentId),
-      );
-    } catch (error) {
-      console.error("Error deleting comment:", error);
-    }
-  };
-  const handleSaveEdit = async (commentId) => {
-    if (!editText.trim()) return;
-    try {
-      await api.patch("comment/", { commentId, text: editText });
-      setComments((current) =>
-        current.map((comment) =>
-          comment._id === commentId ? { ...comment, text: editText } : comment,
-        ),
-      );
-      setEditingId(null);
-      setEditText("");
-    } catch (error) {
-      console.error("Error editing comment:", error);
     }
   };
 
@@ -171,6 +128,8 @@ export default function ProductDetail() {
       setLoading(false);
     }
   };
+
+  const myStock = Math.max(0, (product?.stock || 0) - (cartData?.count || 0));
 
   //cart
   const addtoCart = async () => {
@@ -287,6 +246,31 @@ export default function ProductDetail() {
     }
   }, [id, userId]);
 
+  const trackProductEvent = async () => {
+    try {
+      console.log(userId);
+      await api.post("product/event_product", {
+        productId: id,
+        userId: userId,
+      });
+    } catch (error) {
+      console.error(
+        "Failed to track product event:",
+        error.response?.data?.message,
+      );
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      trackProductEvent();
+    }, 20000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [id, userId]);
+
   if (loading) return <Loading />;
 
   return (
@@ -327,37 +311,47 @@ export default function ProductDetail() {
             <h2 className="mb-2 text-2xl font-bold leading-tight text-white md:text-3xl">
               {product.name}
             </h2>
-
-            <div className="my-4 flex items-center gap-2">
-              <span className="rounded-lg bg-white px-3 py-2 text-3xl font-bold text-zinc-950">
-                ج.م.{product.discountPrice || product.price}
-              </span>
-              {product.discountPrice && (
-                <span className="text-lg text-zinc-500 line-through">
-                  ج.م.{product.price}
+            <div className="flex w-full justify-between">
+              <div className="my-4 flex items-center gap-2">
+                <span className="rounded-lg bg-white px-3 py-2 text-3xl font-bold text-zinc-950">
+                  ج.م.{product.discountPrice || product.price}
                 </span>
-              )}
+
+                {product.discountPrice && (
+                  <span className="text-lg text-zinc-500 line-through">
+                    ج.م.{product.price}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-row-reverse items-center gap-1 ">
+                {/* <p className="text-white">:stcock</p>{" "} */}
+                <p className="rounded-lg bg-white px-3 py-2 md:text-xl font-bold text-zinc-950">
+                  {myStock}
+                </p>
+              </div>
             </div>
+
             <p className="text-zinc-400">{product.description}</p>
             {cartData.isinCart ? (
-              <div className="my-5 inline-flex items-center justify-between border border-zinc-700 bg-zinc-900 p-2 shadow-lg shadow-black/20 not-md:w-full rounded-full">
+              <div className="my-5 inline-flex w-fit items-center justify-between gap-2 rounded-full border border-zinc-700 bg-zinc-900 p-2 shadow-lg shadow-black/20 max-md:w-full">
                 {cartData.count <= 1 ? (
                   <button
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-500/10 text-xl font-medium text-zinc-300 transition-colors hover:bg-zinc-500 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-400 cursor-pointer"
+                    className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-500/10 text-xl font-medium text-zinc-300 transition-colors hover:bg-zinc-500 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                     type="button"
-                    aria-label="Decrease quantity"
-                    onClick={() => deleteProfromCart()}
+                    aria-label="Remove from cart"
+                    onClick={deleteProfromCart}
                   >
                     <Trash9 />
                   </button>
                 ) : (
                   <button
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-500/10 text-xl font-medium text-zinc-300 transition-colors hover:bg-zinc-500 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-400 cursor-pointer"
+                    className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-500/10 text-xl font-medium text-zinc-300 transition-colors hover:bg-zinc-500 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                     type="button"
                     aria-label="Decrease quantity"
                     onClick={() => editCountCart("decrease")}
                   >
                     <span className="sr-only">Decrease quantity</span>
+
                     <svg
                       className="h-4 w-4"
                       aria-hidden="true"
@@ -376,23 +370,24 @@ export default function ProductDetail() {
                   </button>
                 )}
 
-                <div className="mx-3">
+                <div className="mx-1">
                   <input
                     type="number"
-                    className="h-10 w-16 rounded-xl border border-zinc-700 bg-zinc-950 px-2 text-center text-lg font-bold text-white outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-400/30"
-                    placeholder={1}
-                    required
+                    className="h-10 w-16 rounded-xl border border-zinc-700 bg-zinc-950 px-2 text-center text-lg font-bold text-white outline-none"
                     readOnly
                     value={cartData.count}
                   />
                 </div>
+
                 <button
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-500/10 text-xl font-medium text-zinc-300 transition-colors hover:bg-zinc-500 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-400 cursor-pointer"
+                  className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-500/10 text-xl font-medium text-zinc-300 transition-colors hover:bg-zinc-500 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-zinc-500/10 disabled:hover:text-zinc-300"
                   aria-label="Increase quantity"
                   type="button"
+                  disabled={cartData.count >= myStock}
                   onClick={() => editCountCart("increase")}
                 >
                   <span className="sr-only">Increase quantity</span>
+
                   <svg
                     className="h-4 w-4"
                     aria-hidden="true"
@@ -411,23 +406,25 @@ export default function ProductDetail() {
                 </button>
               </div>
             ) : (
-              <div className="flex  gap-3 py-5 flex-row-reverse items-center">
-                <label className="relative block w-28">
-                  {/* <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-500 not-md:hidden">
-                    الكمية
-                  </span> */}
+              <div className="flex w-full flex-row-reverse items-center gap-3 py-5">
+                <label className="relative block w-28 shrink-0">
                   <select
+                    disabled={myStock <= 0}
                     dir="ltr"
                     value={count}
                     onChange={(event) => setCount(Number(event.target.value))}
-                    className="h-12 w-full cursor-pointer appearance-none rounded-full border border-zinc-700 bg-zinc-900 px-4 text-base font-semibold text-white outline-none transition-colors focus:border-zinc-400"
+                    className="h-12 w-full cursor-pointer appearance-none rounded-full border border-zinc-700 bg-zinc-900 px-4 text-base font-semibold text-white outline-none transition-colors focus:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {[1, 2, 3, 4, 5].map((quantity) => (
+                    {Array.from(
+                      { length: Math.min(myStock, 5) },
+                      (_, index) => index + 1,
+                    ).map((quantity) => (
                       <option key={quantity} value={quantity}>
                         {quantity}
                       </option>
                     ))}
                   </select>
+
                   <svg
                     className="pointer-events-none absolute bottom-4 right-3 h-4 w-4 text-zinc-500"
                     xmlns="http://www.w3.org/2000/svg"
@@ -443,12 +440,16 @@ export default function ProductDetail() {
                     />
                   </svg>
                 </label>
+
                 <button
+                  disabled={myStock <= 0}
                   type="button"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 flex-1 rounded-full border border-zinc-600 bg-zinc-900 px-4 py-3 font-semibold text-zinc-100 transition hover:border-amber-400 hover:text-amber-300"
+                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-zinc-600 bg-zinc-900 px-4 py-3 font-semibold text-zinc-100 transition hover:border-amber-400 hover:text-amber-300 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:opacity-60 disabled:hover:border-zinc-700 disabled:hover:text-zinc-500"
                   onClick={addtoCart}
                 >
-                  <ShoppingCart /> أضف إلى السلة
+                  <ShoppingCart />
+
+                  {myStock <= 0 ? "غير متوفر" : "أضف إلى السلة"}
                 </button>
               </div>
             )}
@@ -558,6 +559,7 @@ export default function ProductDetail() {
                   isinmyFavourites={isinmyFavourites}
                   ratingCount={product.ratingCount}
                   ratingAvg={product.ratingAverage}
+                  stock={product.stock}
                 />
               </Link>
             );

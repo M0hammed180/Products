@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import WhatsAppButton from "../Elements/WhatsAppButton";
 import { orderWhatsAppMessage } from "../../utils/whatsapp";
 import { FaPhone } from "react-icons/fa";
+import socket from "../../api/socket";
+import Loading from "../Elements/Loading";
 
 const formatDate = (date) => {
   if (!date) return "غير محدد";
@@ -30,20 +32,102 @@ const Status = ({ children }) => (
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const { userId, isAuthenticated } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !userId) return;
+    socket.emit("admin");
+  }, []);
 
+  //fetchOrders
+  useEffect(() => {
+    if (!isAuthenticated || !userId) return;
+    setLoading(true);
     api
       .get(`order/myorders/${userId}`)
       .then((response) => {
         if (response.data.orders) setOrders(response.data.orders || []);
+        console.log(response.data);
+        setLoading(false);
       })
-      .catch((error) => console.log("Error fetching orders", error));
+      .catch((error) => {
+        console.log("Error fetching orders", error);
+        setLoading(false);
+      });
   }, [isAuthenticated, userId]);
 
+  useEffect(() => {
+    const handleNewMessage = (message) => {
+      console.log("NEW MESSAGE:", message);
+
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          String(order._id) === String(message.orderId)
+            ? {
+                ...order,
+                lastMessage: message,
+                messages: (order.messages || 0) + 1,
+              }
+            : order,
+        ),
+      );
+    };
+
+    socket.on("new_order_message", handleNewMessage);
+
+    return () => {
+      socket.off("new_order_message", handleNewMessage);
+    };
+  }, []);
+
+  const ProductImageStack = ({ images = [], name, height = "h-20" }) => {
+    return (
+      <div className={`relative ${height} w-15 overflow-visible`}>
+        {images.reverse().map((item, index) => {
+          const isMain = index === images.length - 1;
+
+          const offset = (images.length - 1 - index) * 3;
+          const rotate = -(images.length - 1 - index) * 1.5;
+
+          return (
+            <div
+              key={index}
+              className={`
+              absolute
+              h-full
+              w-full
+              overflow-hidden
+              rounded-2xl
+              bg-white
+              ${
+                isMain
+                  ? "z-10 shadow-[0_10px_30px_rgba(0,0,0,0.75)]"
+                  : "shadow-[0_8px_25px_rgba(0,0,0,0.65)]"
+              }
+            `}
+              style={{
+                left: `-${offset}px`,
+                top: `${offset}px`,
+                transform: `rotate(${rotate}deg)`,
+                zIndex: index,
+              }}
+            >
+              <img
+                src={item.productId?.images?.[0]}
+                alt={name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return <Loading />;
+  }
   return (
-    <main className="min-h-screen bg-black px-3 pb-8 pt-24 text-white sm:px-6 sm:pt-28 lg:px-8">
+    <main className="min-h-screen bg-black px-3 pb-8 pt-25 text-white sm:px-6   lg:px-8">
       <section className="mx-auto w-full max-w-7xl">
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
@@ -73,15 +157,21 @@ export default function Orders() {
             <div className="hidden overflow-hidden rounded-2xl border border-zinc-700 shadow-xl md:block">
               <table className="w-full min-w-225 text-left text-sm text-zinc-300">
                 <thead className="bg-zinc-900 text-xs uppercase text-zinc-400">
-                  <tr>
-                    <th scope="col" className="px-5 py-4">
+                  <tr className=" text-right">
+                    <th scope="col" className="px-5 py-4  ">
                       الطلب
                     </th>
-                    <th scope="col" className="px-5 py-4 text-left">
+                    <th scope="col" className="px-5 py-4  ">
                       الإجمالي
                     </th>
-                    <th scope="col" className="px-5 py-4">
-                      <span className="sr-only">التواصل عبر واتساب</span>
+                    <th scope="col" className="px-5 py-4 ">
+                      الرسائل الغير مقروئة
+                    </th>
+                    <th scope="col" className="px-5 py-4 ">
+                      آخر رسالة
+                    </th>
+                    <th scope="col" className="px-5 py-4 ">
+                      الحالة
                     </th>
                   </tr>
                 </thead>
@@ -91,32 +181,49 @@ export default function Orders() {
                       key={order._id}
                       className="border-t border-zinc-700 bg-zinc-800 transition hover:bg-zinc-700"
                     >
-                      <td className="max-w-44 px-5 py-4 font-semibold">
+                      <td className=" whitespace-nowrap px-5 py-4 text-right font-semibold text-white">
                         <Link
                           to={`/order/${order._id}`}
-                          className="block truncate text-white hover:text-amber-300"
+                          className="  text-white hover:text-amber-300 flex items-center justify-start gap-5"
                           title={order._id}
                         >
-                          #{order._id}
+                          <ProductImageStack
+                            images={order.products}
+                            name={order._id}
+                          />
+                          <p className=" truncate font-semibold text-white">
+                            #{order._id}
+                          </p>
                         </Link>
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-right font-semibold text-white">
-                        ${order.price}
+                        ج.م.{order.price}
                       </td>
-                      <td className="px-5 py-4">
-                        <WhatsAppButton
-                          message={orderWhatsAppMessage(order)}
-                          className="whitespace-nowrap"
-                        >
-                          التحدث بخصوص الطلب
-                        </WhatsAppButton>
-                        <a
-                          href="tel:01200105320"
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 mr-2 "
-                        >
-                          <FaPhone className="h-5 w-5" aria-hidden="true" />
-                          <span>الاتصال عبر الهاتف</span>
-                        </a>
+                      <td className="whitespace-nowrap px-5 py-4 text-right font-semibold text-white">
+                        {order.messages >= 1 ? (
+                          <span className="px-2 py-0.5 md:px-3 md:py-1 rounded-full bg-amber-600">
+                            {order.messages}
+                          </span>
+                        ) : (
+                          <span>{order.messages}</span>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-right font-semibold text-white">
+                        {order.lastMessage ? (
+                          <span dir="rtl">
+                            {order?.lastMessage.senderId == userId
+                              ? "Me"
+                              : "Admin"}
+                            : {order?.lastMessage?.text}
+                          </span>
+                        ) : (
+                          "لا توجد رسائل"
+                        )}
+                      </td>
+                      <td
+                        className={`whitespace-nowrap px-5 py-4 text-right font-semibold text-white`}
+                      >
+                        {order.status}
                       </td>
                     </tr>
                   ))}
@@ -135,41 +242,77 @@ export default function Orders() {
                     className="block transition active:scale-[0.99]"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-xs tracking-wide text-zinc-500">
-                          الطلب
-                        </p>
-                        <p className="mt-1 truncate font-semibold text-white">
+                      <div className="w-full flex items-center justify-between">
+                        <ProductImageStack
+                          images={order.products}
+                          name={order._id}
+                        />
+                        <p className=" truncate font-semibold text-white">
                           #{order._id}
                         </p>
                       </div>
                     </div>
                     <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4 border-t border-zinc-700 pt-4 text-sm">
-
                       <div className="text-right">
                         <dt className="text-zinc-500">الإجمالي</dt>
                         <dd className="mt-1 font-bold text-white">
-                          ${order.price}
+                          ج.م.{order.price}
                         </dd>
                       </div>
+                      <div className="text-right">
+                        <dt className="text-zinc-500">الحالة</dt>
+                        <dd
+                          className={`mt-1 font-bold  capitalize w-fit ${order.status == "delivered" ? "bg-zinc-900 text-white" : "bg-yellow-50 text-black"} rounded-full px-2 py-1`}
+                        >
+                          {order.status}
+                        </dd>
+                      </div>
+                      <div className="text-right">
+                        <dt className="text-zinc-500"> الرسائل الغير مقروئة</dt>
+                        <dd className="mt-1 font-bold text-white">
+                          {order.messages >= 1 ? (
+                            <span className="px-2 py-0.5 md:px-3 md:py-1 rounded-full bg-amber-600">
+                              {order.messages}
+                            </span>
+                          ) : (
+                            <span>{order.messages}</span>
+                          )}
+                        </dd>
+                      </div>
+                      {order.lastMessage && (
+                        <div className="text-right">
+                          <dt className="text-zinc-500"> آخر رسالة</dt>
+                          <dd className="mt-1 font-bold text-white">
+                            <span dir="rtl">
+                              {order?.lastMessage.senderId == userId
+                                ? "Me"
+                                : "Admin"}
+                              : {order?.lastMessage?.text}
+                            </span>
+                          </dd>
+                        </div>
+                      )}
                     </dl>
                     <span className="mt-4 block text-sm font-semibold text-amber-300">
                       عرض تفاصيل الطلب ←
                     </span>
                   </Link>
-                  <WhatsAppButton
-                    message={orderWhatsAppMessage(order)}
-                    className="mt-4 w-full"
-                  >
-                    التحدث بخصوص الطلب
-                  </WhatsAppButton>
-                  <a
-                    href="tel:01200105320"
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 mt-2 w-full"
-                  >
-                    <FaPhone className="h-5 w-5" aria-hidden="true" />
-                    <span>الاتصال عبر الهاتف</span>
-                  </a>
+                  {/* <div className="flex items-center justify-around mt-2">
+                    {" "}
+                    <WhatsAppButton
+                      message={orderWhatsAppMessage(order)}
+                      className=" w-fit"
+                    >
+                      التحدث بخصوص الطلب
+                    </WhatsAppButton>
+                    <a
+                      href="tel:01200105320"
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[blue] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[blue] focus:outline-none focus:ring-2 focus:ring-[blue]/50 w-fit"
+                    >
+                      <FaPhone className="h-5 w-5" aria-hidden="true" />
+                      <span>الاتصال عبر الهاتف</span>
+                    </a>
+                  </div> */}
                 </article>
               ))}
             </div>

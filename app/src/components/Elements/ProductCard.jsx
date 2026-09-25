@@ -3,7 +3,7 @@ import api from "../api";
 import Loading from "../Elements/Loading";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { CartAdd2, Heart5, HeartSlash, Trash9 } from "reicon-react";
+import { CartAdd2, Edit, Heart5, HeartSlash, Trash9 } from "reicon-react";
 import { setCartCount, setFavouritesProductIds } from "../../Redux/pageSlice";
 import WhatsAppButton from "./WhatsAppButton";
 import { productWhatsAppMessage } from "../../utils/whatsapp";
@@ -60,11 +60,30 @@ export default function ProductCard({
   userId,
   count,
   isinmyFavourites,
+  role,
+  forShow,
+  stock,
 }) {
   const dispatch = useDispatch();
+
   const { cartCount, favouritesProductIds } = useSelector(
     (state) => state.page,
   );
+
+  const deleteProduct = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product? This action cannot be undone.",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`product/${id}`);
+    } catch (error) {
+      console.log(error);
+      window.alert("Unable to delete the product. Please try again.");
+    }
+  };
 
   const isLoggedIn = Boolean(userId);
 
@@ -77,7 +96,6 @@ export default function ProductCard({
     }
     return { count: productCount, isinCart: isProductInCart };
   });
-
 
   const isFavourite = isLoggedIn ? isinmyFavourites : isGuestFavourite(id);
 
@@ -196,7 +214,7 @@ export default function ProductCard({
         <img
           src={image?.[0]}
           alt={name}
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-0"
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-0 "
         />
         <img
           src={image?.[1]}
@@ -220,7 +238,7 @@ export default function ProductCard({
           </div>
         )} */}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
           {discountPrice ? (
             <>
               <p className="text-xs font-semibold text-amber-400 line-through sm:text-sm">
@@ -235,108 +253,143 @@ export default function ProductCard({
               ج.م.{price}
             </p>
           )}
+          {forShow && (
+            <>
+              {" "}
+              <div className="flex px-2 py-1 items-center justify-between rounded-full bg-zinc-200">
+                <span className="flex-1 text-center text-xs font-bold text-zinc-800 sm:text-sm">
+                  {count}
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Buttons row: cart control grows to fill the space, favourite stays fixed size next to it */}
-        <div
-          onClick={(e) => e.preventDefault()}
-          className="flex w-full items-center gap-1 justify-center"
-        >
-          {cartData.isinCart ? (
-            <div className="flex h-10 flex-1 items-center justify-between rounded-full bg-zinc-200 px-1">
-              {cartData.count <= 1 ? (
-                <button
-                  className="flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full text-zinc-800 transition hover:bg-zinc-300 active:scale-95"
-                  type="button"
-                  aria-label="Decrease quantity"
-                  onClick={() => deleteProfromCart()}
+
+        {!forShow &&
+          (role == "admin" ? (
+            <>
+              {" "}
+              <div className="flex gap-2" onClick={(e) => e.preventDefault()}>
+                <Link
+                  to={`/edit_product/${id}`}
+                  className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-zinc-200 flex items-center justify-center gap-2 flex-1 "
                 >
-                  <Trash9 className="h-3.5 w-3.5" />
+                  <Edit /> Edit
+                </Link>
+                <button
+                  type="button"
+                  className="rounded-full bg-red-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 "
+                  onClick={() => deleteProduct()}
+                >
+                  <Trash9 />
                 </button>
+              </div>
+            </>
+          ) : (
+            <div
+              onClick={(e) => e.preventDefault()}
+              className="flex w-full items-center gap-1 justify-center"
+            >
+              {cartData.isinCart ? (
+                <div className="flex h-10 flex-1 items-center justify-between rounded-full bg-zinc-200 px-1">
+                  {cartData.count <= 1 ? (
+                    <button
+                      className="flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full text-zinc-800 transition hover:bg-zinc-300 active:scale-95"
+                      type="button"
+                      aria-label="Decrease quantity"
+                      onClick={() => deleteProfromCart()}
+                    >
+                      <Trash9 className="h-3.5 w-3.5" />
+                    </button>
+                  ) : (
+                    <button
+                      className="flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full text-zinc-800 transition hover:bg-zinc-300 active:scale-95"
+                      type="button"
+                      aria-label="Decrease quantity"
+                      onClick={() => editCountCart("decrease")}
+                    >
+                      <svg
+                        className="h-3.5 w-3.5"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 18 2"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M1 1h16"
+                        />
+                      </svg>
+                    </button>
+                  )}
+
+                  <span className="flex-1 text-center text-xs font-bold text-zinc-800 sm:text-sm">
+                    {cartData.count}
+                  </span>
+
+                  <button
+                    disabled={cartData.count >= stock}
+                    className="flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full text-zinc-800 transition hover:bg-zinc-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:active:scale-100"
+                    type="button"
+                    aria-label="Increase quantity"
+                    onClick={() => editCountCart("increase")}
+                  >
+                    <svg
+                      className="h-3.5 w-3.5"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 18"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 1v16M1 9h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
               ) : (
                 <button
-                  className="flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full text-zinc-800 transition hover:bg-zinc-300 active:scale-95"
                   type="button"
-                  aria-label="Decrease quantity"
-                  onClick={() => editCountCart("decrease")}
+                  aria-label={`Add ${name} to cart`}
+                  disabled={stock <= 0}
+                  className="flex h-10 flex-1 touch-manipulation cursor-pointer items-center justify-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-200 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 active:scale-95 disabled:cursor-not-allowed disabled:border-zinc-500 disabled:bg-zinc-500 disabled:text-zinc-300 disabled:opacity-60 disabled:hover:bg-zinc-500 disabled:active:scale-100 sm:text-sm"
+                  onClick={addtoCart}
                 >
-                  <svg
-                    className="h-3.5 w-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 2"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M1 1h16"
-                    />
-                  </svg>
+                  <CartAdd2 />
+                  {stock <= 0 ? "غير متوفر" : "أضف إلى السلة"}
                 </button>
               )}
 
-              <span className="flex-1 text-center text-xs font-bold text-zinc-800 sm:text-sm">
-                {cartData.count}
-              </span>
-
-              <button
-                className="flex h-8 w-8 shrink-0 touch-manipulation items-center justify-center rounded-full text-zinc-800 transition hover:bg-zinc-300 active:scale-95"
-                type="button"
-                aria-label="Increase quantity"
-                onClick={() => editCountCart("increase")}
-              >
-                <svg
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 18 18"
+              {isFavourite ? (
+                <button
+                  type="button"
+                  aria-label={`favourtie ${name}`}
+                  className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-zinc-200 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 active:scale-95"
+                  onClick={deleteProfromFavourites}
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 1v16M1 9h16"
-                  />
-                </svg>
-              </button>
+                  <HeartSlash />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  aria-label={`favourtie ${name}`}
+                  className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-zinc-200 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 active:scale-95"
+                  onClick={addtoFavourites}
+                >
+                  <Heart5 />
+                </button>
+              )}
             </div>
-          ) : (
-            <button
-              type="button"
-              aria-label={`Add ${name} to cart`}
-              className="flex h-10 flex-1 touch-manipulation cursor-pointer items-center justify-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-200 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 active:scale-95 sm:text-sm"
-              onClick={addtoCart}
-            >
-              <CartAdd2 />
-              {/* <span>Add to Cart</span> */}
-            </button>
-          )}
-
-          {isFavourite ? (
-            <button
-              type="button"
-              aria-label={`favourtie ${name}`}
-              className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-zinc-200 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 active:scale-95"
-              onClick={deleteProfromFavourites}
-            >
-              <HeartSlash />
-            </button>
-          ) : (
-            <button
-              type="button"
-              aria-label={`favourtie ${name}`}
-              className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-zinc-200 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 active:scale-95"
-              onClick={addtoFavourites}
-            >
-              <Heart5 />
-            </button>
-          )}
-        </div>
+          ))}
 
         {/* <div onClick={(event) => event.preventDefault()} className="w-full">
           <WhatsAppButton

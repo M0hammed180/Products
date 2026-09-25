@@ -110,7 +110,7 @@ const TeamProgress = ({ shipped, notShipped, delivered }) => {
   }, []);
 
   return (
-    <div className="w-4/12 px-5">
+    <div className="md:w-4/12 px-5">
       <div className=" px-2 w-full bg-zinc-900 text-white rounded-3xl shadow-xs p-4 md:p-6">
         {/* Header */}
         <div className="flex justify-between mb-4 ">

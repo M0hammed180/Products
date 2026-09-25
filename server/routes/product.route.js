@@ -16,5 +16,6 @@ router.get(
 );
 router.get("/product_no_login/:id", productController.showProductinNoLogin);
 router.post("/event_product", productController.trackProductEvent);
+router.get("/event", productController.analytics);
 
 module.exports = router;

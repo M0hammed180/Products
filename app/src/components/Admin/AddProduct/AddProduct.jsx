@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Add, XCircle } from "reicon-react";
+import api from "../../api";
+import { useSelector } from "react-redux";
 
 export default function AddProduct() {
   const [formData, setFormData] = useState({
@@ -12,6 +14,7 @@ export default function AddProduct() {
   const [images, setImages] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
   const [sizes, setSizes] = useState([]);
+  const { categorys } = useSelector((state) => state.page);
 
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -48,21 +51,26 @@ export default function AddProduct() {
     );
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log({
-      ...formData,
-      price: Number(formData.price),
-      stock: Number(formData.stock),
-      size: sizes.map((size) => ({ size })),
-      photo: images,
-    });
+  const handleSubmit = async (event) => {
+    try {
+      event.preventDefault();
+      const res = await api.post("product/", {
+        ...formData,
+        price: Number(formData.price),
+        stock: Number(formData.stock),
+        size: sizes.map((size) => ({ size })),
+        photo: images,
+      });
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <div>
-      <div className="flex items-center justify-center p-12">
-        <div className="mx-auto w-full max-w-137.5 bg-zinc-900 text-white rounded-3xl">
+      <div className="flex items-center justify-center md:p-12">
+        <div className="mx-auto w-full max-w-137.5 md:bg-zinc-900 text-white md:rounded-3xl">
           <form className="py-6 px-9" onSubmit={handleSubmit}>
             {imageUrls.length > 0 ? (
               <div className="flex gap-2 mb-2">
@@ -251,9 +259,11 @@ export default function AddProduct() {
                 className="w-full rounded-md border border-[#e0e0e0] bg-zinc-800 px-6 py-3 text-base font-medium text-white outline-none focus:border-[#6A64F1] focus:shadow-md"
               >
                 <option value="">Select a category</option>
-                <option value="tshirts">T-Shirts</option>
-                <option value="pantalons">Pantalons</option>
-                <option value="shoes">Shoes</option>
+                {categorys.map((c) => (
+                  <option key={c.id} value={c.id} className="">
+                    <p className="capitalize">{c.title}</p>
+                  </option>
+                ))}
               </select>
             </div>
             <div className="mb-5">

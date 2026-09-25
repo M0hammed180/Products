@@ -1,5 +1,6 @@
 const Favourites = require("../models/favouritesSchema");
 const asyncWrapper = require("../middleware/asyncWrapper");
+const Event = require("../models/eventSchema");
 
 const addtoFavourites = asyncWrapper(async (req, res) => {
   const { productId, userId } = req.body;
@@ -14,6 +15,20 @@ const addtoFavourites = asyncWrapper(async (req, res) => {
     await Favourites.create({
       userId,
       products: [productId],
+    });
+  }
+
+  const existingEvent = await Event.findOne({
+    userId,
+    productId,
+    type: "wishlist",
+  });
+
+  if (!existingEvent) {
+    await Event.create({
+      userId,
+      productId,
+      type: "wishlist",
     });
   }
 

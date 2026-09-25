@@ -5,7 +5,6 @@ const eventSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
 
     productId: {
@@ -16,24 +15,8 @@ const eventSchema = new mongoose.Schema(
 
     type: {
       type: String,
-      enum: [
-        "product_view",
-        "add_to_cart",
-        "wishlist",
-        "purchase",
-        "review",
-      ],
+      enum: ["product_view", "add_to_cart", "wishlist", "purchase"],
       required: true,
-    },
-
-    point: {
-      type: Number,
-      default: 1,
-    },
-
-    metadata: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {},
     },
   },
   {

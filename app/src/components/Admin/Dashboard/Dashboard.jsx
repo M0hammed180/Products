@@ -1,219 +1,403 @@
-import React from "react";
-import SalesChart from "../Chart1";
-import TeamProgress from "../Chart2";
+import React, { useEffect, useState } from "react";
+import api from "../../api";
+import { Box2, Eye3, Heart5, ShoppingCart, Unread } from "reicon-react";
 
 export default function Dashboard() {
+  const [data, setData] = useState({
+    products: [],
+    mostViewed: [],
+    bestSelling: [],
+    mostAddedToCart: [],
+    mostAddedToFavorite: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  const fetchEventData = async () => {
+    try {
+      const res = await api.get("/product/event");
+      console.log(res.data);
+
+      setData(res.data);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEventData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-black">
+        <p className="text-gray-500 dark:text-gray-400">جاري التحميل...</p>
+      </div>
+    );
+  }
+
+  // أول منتج (الكبير في النص)
+  const featuredProduct = data.products?.[0];
+  // باقي المنتجات (8 منتجات)
+  const remainingProducts = data.products?.slice(1, 9) || [];
+
+  // البيانات الأربع (limit 10)
+  const mostViewedLimited = data.mostViewed?.slice(0, 10) || [];
+  const bestSellingLimited = data.bestSelling?.slice(0, 10) || [];
+  const cartLimited = data.mostAddedToCart?.slice(0, 10) || [];
+  const favoriteLimited = data.mostAddedToFavorite?.slice(0, 10) || [];
+
   return (
-    <div>
-      <div className="flex overflow-hidden bg-gray-100 dark:bg-black">
-        <div
-          className="bg-gray-900 opacity-50 hidden fixed inset-0 z-10"
-          id="sidebarBackdrop"
-        ></div>
+    <div className="min-h-screen bg-gray-100 dark:bg-black p-4 sm:p-6">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-white mb-4">
+          إحصائيات المبيعات
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* المنتجات المباعة */}
+          <div className="rounded-2xl bg-zinc-900 p-6 shadow-lg hover:shadow-xl transition-shadow border border-zinc-700">
+            <div>
+              <p className="text-zinc-400 text-sm font-semibold mb-2">
+                المنتجات المباعة
+              </p>
+              <p className="text-4xl font-bold text-white">
+                {data?.totalSalesAnalytics?.soldQuantity || 0}
+              </p>
+              <p className="text-xs text-zinc-500 mt-2">عدد الوحدات المباعة</p>
+            </div>
+          </div>
 
-        <div
-          id="main-content"
-          className="relative h-full w-full overflow-y-auto bg-gray-100 dark:bg-black "
-        >
-          <main>
-            <div className="pt-6 px-4">
-              <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                <div className="rounded-3xl bg-white p-4 shadow dark:bg-zinc-900 sm:p-6 xl:p-8">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl font-bold leading-none text-gray-900 dark:text-gray-100 sm:text-3xl">
-                        2,340
-                      </span>
-                      <h3 className="text-base font-normal text-gray-500 dark:text-gray-400">
-                        New products this week
-                      </h3>
-                    </div>
-                    <div className="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
-                      14.6%
-                      <svg
-                        className="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+          {/* الطلبات */}
+          <div className="rounded-2xl bg-zinc-900 p-6 shadow-lg hover:shadow-xl transition-shadow border border-zinc-700">
+            <div>
+              <p className="text-zinc-400 text-sm font-semibold mb-2">
+                الطلبات
+              </p>
+              <p className="text-4xl font-bold text-white">
+                {data?.orders || 0}
+              </p>
+              <p className="text-xs text-zinc-500 mt-2">عدد الطلبات الإجمالي</p>
+            </div>
+          </div>
 
-                <div className="rounded-3xl bg-white p-4 shadow dark:bg-zinc-900 sm:p-6 xl:p-8">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl font-bold leading-none text-gray-900 dark:text-gray-100 sm:text-3xl">
-                        5,355
-                      </span>
-                      <h3 className="text-base font-normal text-gray-500 dark:text-gray-400">
-                        Visitors this week
-                      </h3>
-                    </div>
-                    <div className="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
-                      32.9%
-                      <svg
-                        className="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-3xl bg-white p-4 shadow dark:bg-zinc-900 sm:p-6 xl:p-8">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl font-bold leading-none text-gray-900 dark:text-gray-100 sm:text-3xl">
-                        385
-                      </span>
-                      <h3 className="text-base font-normal text-gray-500 dark:text-gray-400">
-                        User signups this week
-                      </h3>
-                    </div>
-                    <div className="ml-5 w-0 flex items-center justify-end flex-1 text-red-500 text-base font-bold">
-                      -2.7%
-                      <svg
-                        className="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+          {/* إجمالي المبيعات */}
+          <div className="rounded-2xl bg-zinc-900 p-6 shadow-lg hover:shadow-xl transition-shadow border border-zinc-700">
+            <div>
+              <p className="text-zinc-400 text-sm font-semibold mb-2">
+                إجمالي المبيعات
+              </p>
+              <p className="text-4xl font-bold text-white">
+                {data?.totalSales[0]?.totalSales || 0}
+              </p>
+              <p className="text-xs text-zinc-500 mt-2">جنيه مصري</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* القسم الأول: المنتج الكبير والمنتجات الصغيرة */}
+      <div className="mb-12">
+        {/* المنتج الكبير في النص */}
+        {featuredProduct && (
+          <div className="mb-8 rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-lg overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              {/* الصورة */}
+              <div className="flex justify-center">
+                <img
+                  src={featuredProduct.product?.images?.[0]}
+                  alt={featuredProduct.product?.name}
+                  className="h-64 w-64 object-cover rounded-2xl"
+                />
               </div>
-              <div className="py-6 px- flex">
-                <SalesChart />
-                <TeamProgress shipped={20} notShipped={10} delivered={50} />
-              </div>
-              <div className="grid grid-cols-1 xl:gap-4 my-4">
-                <div className="mb-4 h-full rounded-3xl bg-white p-4 shadow dark:bg-zinc-900 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold leading-none text-gray-900 dark:text-gray-100">
-                      Latest Customers
-                    </h3>
-                    <a
-                      href="#"
-                      className="text-sm font-medium text-cyan-600 hover:bg-gray-100 rounded-3xl inline-flex items-center p-2"
-                    >
-                      View all
-                    </a>
+              {/* التفاصيل */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-4xl font-bold text-cyan-600">1</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    الأول
+                  </span>
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  {featuredProduct.product?.name}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  {featuredProduct.product?.description}
+                </p>
+                <div className="flex gap-4 items-center mb-4">
+                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {featuredProduct.product?.discountPrice} جنيه
+                  </span>
+                  <span className="text-lg text-gray-400 line-through">
+                    {featuredProduct.product?.price} جنيه
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                  <div className="bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      المشاهدات
+                    </span>
+                    <p className="text-lg font-bold text-cyan-600">
+                      {featuredProduct.score?.views || 0}
+                    </p>
                   </div>
-                  <div className="flow-root">
-                    <ul
-                      role="list"
-                      className="divide-y divide-gray-200 dark:divide-zinc-700"
-                    >
-                      <li className="py-3 sm:py-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="shrink-0">
-                            <img
-                              className="h-8 w-8 rounded-full"
-                              src="https://demo.themesberg.com/windster/images/users/neil-sims.png"
-                              alt="Neil image"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-                              Neil Sims
-                            </p>
-                            <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                              <a
-                                href="/cdn-cgi/l/email-protection"
-                                className="__cf_email__"
-                                data-cfemail="17727a767e7b57607e7973646372653974787a"
-                              >
-                                [email&#160;protected]
-                              </a>
-                            </p>
-                          </div>
-                          <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
-                            $320
-                          </div>
-                        </div>
-                      </li>
-                      <li className="py-3 sm:py-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="shrink-0">
-                            <img
-                              className="h-8 w-8 rounded-full"
-                              src="https://demo.themesberg.com/windster/images/users/bonnie-green.png"
-                              alt="Bonnie image"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-                              Bonnie Green
-                            </p>
-                            <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                              <a
-                                href="/cdn-cgi/l/email-protection"
-                                className="__cf_email__"
-                                data-cfemail="d4b1b9b5bdb894a3bdbab0a7a0b1a6fab7bbb9"
-                              >
-                                [email&#160;protected]
-                              </a>
-                            </p>
-                          </div>
-                          <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
-                            $3467
-                          </div>
-                        </div>
-                      </li>
-                      <li className="py-3 sm:py-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex-shrink-0">
-                            <img
-                              className="h-8 w-8 rounded-full"
-                              src="https://demo.themesberg.com/windster/images/users/michael-gough.png"
-                              alt="Michael image"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-                              Michael Gough
-                            </p>
-                            <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                              <a
-                                href="/cdn-cgi/l/email-protection"
-                                className="__cf_email__"
-                                data-cfemail="40252d21292c0037292e24333425326e232f2d"
-                              >
-                                [email&#160;protected]
-                              </a>
-                            </p>
-                          </div>
-                          <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
-                            $67
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
+                  <div className="bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      الطلبات
+                    </span>
+                    <p className="text-lg font-bold text-green-600">
+                      {featuredProduct.score?.orders || 0}
+                    </p>
                   </div>
+                  <div className="bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      السلة
+                    </span>
+                    <p className="text-lg font-bold text-blue-600">
+                      {featuredProduct.score?.addToCart || 0}
+                    </p>
+                  </div>
+                  <div className="bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      المفضلة
+                    </span>
+                    <p className="text-lg font-bold text-red-600">
+                      {featuredProduct.score?.favorites || 0}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <span>درجة الشهرة: {featuredProduct.popularityScore}</span>
+                  <span>المخزون: {featuredProduct.product?.stock}</span>
                 </div>
               </div>
             </div>
-          </main>
+          </div>
+        )}
+
+        {/* المنتجات الصغيرة (8 منتجات) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {remainingProducts.map((product, index) => (
+            <div
+              key={product.product?._id}
+              className="rounded-2xl bg-white dark:bg-zinc-900 p-4 shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+            >
+              <div className="mb-2 flex justify-between items-center">
+                <span className="text-lg font-bold text-cyan-600">
+                  #{index + 2}
+                </span>
+                <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full">
+                  {product.popularityScore}
+                </span>
+              </div>
+              <img
+                src={product.product?.images?.[0]}
+                alt={product.product?.name}
+                className="w-full h-32 object-cover rounded-lg mb-3"
+              />
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
+                {product.product?.name}
+              </h3>
+              <div className="text-sm mb-3">
+                <span className="font-bold text-gray-900 dark:text-white">
+                  {product.product?.discountPrice}
+                </span>
+                <span className="text-gray-400 line-through ms-2 text-xs">
+                  {product.product?.price}
+                </span>
+              </div>
+
+              {/* الإحصائيات الصغيرة */}
+              <div className="grid grid-cols-4 gap-1 mb-2 text-xs">
+                <div className=" dark:bg-zinc-700 text-zinc-200 p-1 rounded text-center flex flex-col items-center gap-1">
+                  <div className="font-bold">{product.score?.views || 0}</div>
+                  <div className="text-xs">
+                    <Eye3 size={15} />
+                  </div>
+                </div>
+                <div className=" dark:bg-zinc-700 text-zinc-200 p-1 rounded text-center flex flex-col items-center gap-1">
+                  <div className="font-bold">{product.score?.orders || 0}</div>
+                  <div className="text-xs">
+                    <Box2 size={15} />
+                  </div>
+                </div>
+                <div className=" dark:bg-zinc-700 text-zinc-200  p-1 rounded text-center flex flex-col items-center gap-1">
+                  <div className="font-bold">
+                    {product.score?.addToCart || 0}
+                  </div>
+                  <div className="text-xs">
+                    <ShoppingCart size={15} />
+                  </div>
+                </div>
+                <div className=" dark:bg-zinc-700 text-zinc-200 p-1 rounded text-center flex flex-col items-center gap-1">
+                  <div className="font-bold">
+                    {product.score?.favorites || 0}
+                  </div>
+                  <div className="text-xs">
+                    <Heart5 size={15} />
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                المخزون: {product.product?.stock}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* القسم الثاني: الإحصائيات الأربعة */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* أكثر المشاهدة */}
+        <div className="rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-lg">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            أكثر المنتجات مشاهدة
+          </h3>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {mostViewedLimited.map((item, index) => (
+              <div
+                key={item._id}
+                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-zinc-800 rounded-lg hover:shadow-md transition-shadow"
+              >
+                <span className="font-bold text-yellow-600 min-w-fit">
+                  #{index + 1}
+                </span>
+                <img
+                  src={item.product?.images?.[0]}
+                  alt={item.product?.name}
+                  className="w-12 h-12 object-cover rounded-lg"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">
+                    {item.product?.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {item.product?.discountPrice} جنيه
+                  </p>
+                </div>
+                <span className="text-sm text-yellow-600 font-bold min-w-fit flex flex-row-reverse gap-1 items-center">
+                  {item.views || 0} <Eye3 size={16} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* أكثر المشتريات */}
+        <div className="rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-lg">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            أكثر المنتجات مبيعاً
+          </h3>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {bestSellingLimited.length > 0 ? (
+              bestSellingLimited.map((item, index) => (
+                <div
+                  key={item._id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-zinc-800 rounded-lg hover:shadow-md transition-shadow"
+                >
+                  <span className="font-bold text-cyan-600 min-w-fit">
+                    #{index + 1}
+                  </span>
+                  <img
+                    src={item.product?.images?.[0]}
+                    alt={item.product?.name}
+                    className="w-12 h-12 object-cover rounded-lg"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">
+                      {item.product?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.product?.discountPrice} جنيه
+                    </p>
+                  </div>
+                  <span className="text-sm text-cyan-600 font-bold min-w-fit flex flex-row-reverse gap-1 items-center">
+                    {item.orders || 0} <Box2 size={16} />
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">لا توجد بيانات</p>
+            )}
+          </div>
+        </div>
+
+        {/* أكثر الإضافة للسلة */}
+        <div className="rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-lg">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            أكثر إضافة للسلة
+          </h3>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {cartLimited.length > 0 ? (
+              cartLimited.map((item, index) => (
+                <div
+                  key={item._id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-zinc-800 rounded-lg hover:shadow-md transition-shadow"
+                >
+                  <span className="font-bold text-blue-600 min-w-fit">
+                    #{index + 1}
+                  </span>
+                  <img
+                    src={item.product?.images?.[0]}
+                    alt={item.product?.name}
+                    className="w-12 h-12 object-cover rounded-lg"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">
+                      {item.product?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.product?.discountPrice} جنيه
+                    </p>
+                  </div>
+                  <span className="text text-blue-600 font-bold min-w-fit flex flex-row-reverse gap-1 items-center">
+                    {item.addToCart || 0} <ShoppingCart size={16} />
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">لا توجد بيانات</p>
+            )}
+          </div>
+        </div>
+
+        {/* أكثر الإضافة للمفضلة */}
+        <div className="rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-lg">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            أكثر إضافة للمفضلة
+          </h3>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {favoriteLimited.length > 0 ? (
+              favoriteLimited.map((item, index) => (
+                <div
+                  key={item._id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-zinc-800 rounded-lg hover:shadow-md transition-shadow"
+                >
+                  <span className="font-bold text-red-600 min-w-fit">
+                    #{index + 1}
+                  </span>
+                  <img
+                    src={item.product?.images?.[0]}
+                    alt={item.product?.name}
+                    className="w-12 h-12 object-cover rounded-lg"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">
+                      {item.product?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.product?.discountPrice} جنيه
+                    </p>
+                  </div>
+                  <span className=" text-red-600 font-bold min-w-fit flex flex-row-reverse gap-1 items-center">
+                    {item.wishlist || 0} <Heart5 size={16} />
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">لا توجد بيانات</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

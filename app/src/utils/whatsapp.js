@@ -16,6 +16,7 @@ export const productWhatsAppMessage = ({ name, price, image }) =>
     `اسم المنتج: ${name || "-"}`,
     `السعر: ${price ?? "-"}`,
     image ? `رابط الصورة: ${image}` : null,
+    `رابط المنتج: ${window.location.href}`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -24,6 +25,7 @@ export const orderWhatsAppMessage = ({ id, _id, price, products = [] }) => {
   const productLines = products
     .map((item) => {
       const product = item.productId || item;
+
       return `- ${product?.name || "منتج"} × ${item.count || 1}`;
     })
     .join("\n");
@@ -33,6 +35,8 @@ export const orderWhatsAppMessage = ({ id, _id, price, products = [] }) => {
     `رقم الطلب: ${id || _id || "-"}`,
     price != null ? `إجمالي الطلب: ${price}` : null,
     productLines ? `المنتجات:\n${productLines}` : null,
+    "الرابط:",
+    window.location.href,
   ]
     .filter(Boolean)
     .join("\n");

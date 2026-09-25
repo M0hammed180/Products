@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Add, XCircle } from "reicon-react";
 import api from "../../api";
 import Loading from "../../Elements/Loading";
+import { useSelector } from "react-redux";
 
 const availableSizes = ["Small", "Medium", "Large", "XL", "2XL", "3XL"];
 
@@ -23,11 +24,12 @@ export default function EditProduct() {
   const [sizes, setSizes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { categorys } = useSelector((state) => state.page);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await api.get(`product/product_detail/${id}`);
+        const response = await api.get(`product/product_detail_no_login/${id}`);
         const product = response.data.productDea;
         const productSizes = (product.size || []).map((item) =>
           typeof item === "string" ? item : item.size,
@@ -275,9 +277,11 @@ export default function EditProduct() {
               className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none focus:border-white"
             >
               <option value="">Select a category</option>
-              <option value="tshirts">T-Shirts</option>
-              <option value="pantalons">Pantalons</option>
-              <option value="shoes">Shoes</option>
+              {categorys.map((c) => (
+                <option key={c.id} value={c.id} className="">
+                  <p className="capitalize">{c.title}</p>
+                </option>
+              ))}
             </select>
           </div>
 

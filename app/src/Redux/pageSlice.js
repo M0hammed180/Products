@@ -1,8 +1,28 @@
 import { createSlice } from "@reduxjs/toolkit";
+import clothes from "../../public/photos/clothes.jpg";
+import electronics from "../../public/photos/electronics.jpg";
+import shoes from "../../public/photos/shoes.jpg";
 
 const StoredPage = {
   search: "",
   searchOrder: true,
+  categorys: [
+    {
+      id: "clothes",
+      title: "ملابس",
+      image: clothes,
+    },
+    {
+      id: "electronics",
+      title: "اجهزة",
+      image: electronics,
+    },
+    {
+      id: "shoes",
+      title: "أحذية",
+      image: shoes,
+    },
+  ],
   category: "",
   cartProductIds: [],
   favouritesProductIds: [],

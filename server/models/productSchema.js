@@ -35,24 +35,8 @@ const productSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["tshirts", "pantalons", "shoes"],
+      // enum: ["tshirts", "pantalons", "shoes"],
       required: true,
-    },
-
-    colors: {
-      type: String,
-      enum: [
-        "Black",
-        "White",
-        "Sand",
-        "Olive",
-        "Navy",
-        "Charcoal",
-        "Cream",
-        "Rust",
-        "Stone",
-        "Denim blue",
-      ],
     },
 
     stock: {

@@ -100,70 +100,67 @@ export default function Register() {
                   hidden
                 />
               </div>
-              <div className="flex gap-4">
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <label
-                      htmlFor="username"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
-                    >
-                      اسم المستخدم
-                    </label>
-                    <input
-                      type="text"
-                      onChange={(e) => setName(e.target.value)}
-                      id="username"
-                      name="username"
-                      className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="phone"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
-                    >
-                      رقم الهاتف
-                    </label>
-                    <input
-                      type="text"
-                      onChange={(e) => setPhone(e.target.value)}
-                      id="phone"
-                      name="phone"
-                      className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-                    />
-                  </div>
+              <div className="flex flex-col w-full gap-2">
+                <div>
+                  <label
+                    htmlFor="username"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    onChange={(e) => setName(e.target.value)}
+                    id="username"
+                    name="username"
+                    className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                  />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
-                    >
-                      البريد الإلكتروني
-                    </label>
-                    <input
-                      type="text"
-                      onChange={(e) => setEmail(e.target.value)}
-                      id="email"
-                      name="email"
-                      className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
-                    >
-                      كلمة المرور
-                    </label>
-                    <input
-                      type="password"
-                      onChange={(e) => setPassword(e.target.value)}
-                      id="password"
-                      name="password"
-                      className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-                    />
-                  </div>
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
+                  >
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    onChange={(e) => setPhone(e.target.value)}
+                    id="phone"
+                    name="phone"
+                    className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="text"
+                    onChange={(e) => setEmail(e.target.value)}
+                    id="email"
+                    name="email"
+                    className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-200"
+                  >
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    id="password"
+                    name="password"
+                    className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                  />
                 </div>
               </div>
 

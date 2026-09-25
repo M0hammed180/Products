@@ -1,29 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import background from "../../../public/shyaka_logo_light.png";
-import person from "../../../public/photos/person.png";
-import jacket from "../../../public/photos/jacket.png";
-import pantalon from "../../../public/photos/pantalon.png";
-import shoes from "../../../public/photos/shoes.png";
-import p1 from "../../../public/1.png";
-import p2 from "../../../public/2.png";
-import p3 from "../../../public/3.png";
-import p4 from "../../../public/4.png";
-import p5 from "../../../public/5.png";
-import p6 from "../../../public/6.png";
 import { ArrowLeft, Heart5, ShoppingCart, Trash9 } from "reicon-react";
 import { setCartCount } from "../../Redux/pageSlice";
-
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  setCartProductIds,
-  setCategoty,
-  setSearch,
-  setSearchOrder,
-} from "../../Redux/pageSlice";
+import { setCategoty } from "../../Redux/pageSlice";
 import { useState } from "react";
 import api from "../api";
 import ProductCard2 from "../Elements/ProductCard";
@@ -48,19 +31,10 @@ export default function Home() {
   const jacketBox = useRef(null);
   const pantalonBox = useRef(null);
   const shoesBox = useRef(null);
-  const { isAuthenticated, userId } = useSelector((state) => state.user);
-  const {
-    search,
-    searchOrder,
-    category,
-    cartProductIds,
-    favouritesProductIds,
-  } = useSelector((state) => state.page);
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     navigate("/login");
-  //   }
-  // }, [isAuthenticated]);
+  const { userId } = useSelector((state) => state.user);
+  const { categorys, cartProductIds, favouritesProductIds } = useSelector(
+    (state) => state.page,
+  );
 
   //products
   const fetchProducts = async () => {
@@ -90,65 +64,70 @@ export default function Home() {
 
   return (
     <>
-      <section className="min-h-screen w-full bg-black pt-13 sm:pt-28">
-        <div className="mx-auto w-full max-w-5xl bg-black px-4 py-7 sm:px-6 md:px-10">
-          <div className="mb-4">
-            <p className="text-sm text-amber-400">تسوّق حسب القسم</p>
-            <h2 className="mt-1 text-2xl font-bold text-white">الأقسام</h2>
-          </div>
-          <div className="space-y-3">
-            {[
-              {
-                id: "tshirts",
-                title: "تيشيرتات",
-                description: "اختيارات مريحة تناسب كل يوم.",
-                image: jacket,
-              },
-              {
-                id: "pantalons",
-                title: "بناطيل",
-                description: "تصاميم عملية بإطلالة مميزة.",
-                image: pantalon,
-              },
-              {
-                id: "shoes",
-                title: "أحذية",
-                description: "أحذية تكمل إطلالتك بثقة.",
-                image: shoes,
-              },
-            ].map((categoryItem) => (
-              <Link
-                key={categoryItem.id}
-                to="/products"
-                onClick={() => dispatch(setCategoty(categoryItem.id))}
-                className="group flex min-h-36 items-center gap-4 overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-900 p-4 transition hover:border-amber-400/70 hover:bg-zinc-800 sm:min-h-44 sm:p-5"
-              >
-                <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-xl bg-zinc-200 p-3 sm:h-32 sm:w-32">
-                  <img
-                    src={categoryItem.image}
-                    alt={categoryItem.title}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col items-start justify-center text-right">
-                  <h3 className="text-xl font-bold text-white sm:text-2xl">
-                    {categoryItem.title}
-                  </h3>
-                  {/* <p className="mt-1 text-sm text-zinc-400 sm:text-base">
-                    {categoryItem.description}
-                  </p> */}
-                  <span className="mt-4 inline-flex items-center rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-950 transition group-hover:bg-amber-300">
-                    اذهب للتسوق ←
-                  </span>
-                </div>
-              </Link>
-            ))}
+      <section className="min-h-screen w-full bg-black mt-20 md:mt-20">
+        <div className="mx-auto w-[90%] border border-zinc-600 h-[calc(55vh)] max-w-5xl bg-zinc-800 rounded-4xl flex flex-row-reverse overflow-clip">
+          <Link
+            key={categorys[0].id}
+            to="/products"
+            onClick={() => dispatch(setCategoty(categorys[0].id))}
+            className="bg-zinc-300 w-1/2 h-full relative"
+          >
+            <img
+              src={categorys[0].image}
+              className="object-cover h-full w-full"
+              alt=""
+            />
+            <div className="bg-black/70 px-3 py-5 absolute w-full bottom-0">
+              <p className="text-white text-xl md:text-2xl font-bold">
+                {categorys[0].title}
+              </p>
+            </div>
+          </Link>
+          <div className="bg-zinc-300 flex flex-col-reverse w-1/2 h-full">
+            <Link
+              key={categorys[1].id}
+              to="/products"
+              onClick={() => dispatch(setCategoty(categorys[1].id))}
+              className="h-1/2 relative "
+            >
+              <img
+                src={categorys[1].image}
+                className="object-cover h-full w-full"
+                alt=""
+              />
+              <div className="bg-black/70 px-3 py-5 absolute w-full bottom-0">
+                <p className="text-white text-xl md:text-2xl font-bold">
+                  {categorys[1].title}
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              key={categorys[2].id}
+              to="/products"
+              onClick={() => dispatch(setCategoty(categorys[2].id))}
+              className="h-1/2 relative "
+            >
+              <img
+                src={categorys[2].image}
+                className="object-cover h-full w-full"
+                alt=""
+              />
+              <div className="bg-black/70 px-3 py-5 absolute w-full bottom-0">
+                <p className="text-white text-xl md:text-2xl font-bold">
+                  {categorys[2].title}
+                </p>
+              </div>
+            </Link>
           </div>
         </div>
+        {/* products */}
         <div className="relative min-h-1/2 w-screen bg-black px-6 py-7 md:px-10 mx-auto ">
           <div className="">
             <div className="mb-6 flex items-center justify-between gap-4">
-              <h2 className="text-3xl font-bold text-white">المنتجات</h2>
+              <h2 className="md:text-3xl text-xl font-bold text-white">
+                المنتجات
+              </h2>
               <div className="flex items-center gap-5">
                 <div className="flex shrink-0 gap-2 not-md:hidden">
                   <button
@@ -216,6 +195,7 @@ export default function Home() {
                       isinmyFavourites={isinmyFavourites}
                       ratingCount={product.ratingCount}
                       ratingAvg={product.ratingAverage}
+                      stock={product.stock}
                     />
                   </Link>
                 );
@@ -227,3 +207,37 @@ export default function Home() {
     </>
   );
 }
+
+// <div className="mb-4">
+//   <p className="text-sm text-amber-400">تسوّق حسب القسم</p>
+//   <h2 className="mt-1 text-2xl font-bold text-white">الأقسام</h2>
+// </div>
+// <div className="space-y-3">
+//   {categorys.map((categoryItem) => (
+// <Link
+//   key={categoryItem.id}
+//   to="/products"
+//   onClick={() => dispatch(setCategoty(categoryItem.id))}
+//       className="group flex min-h-36 items-center gap-4 overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-900 p-4 transition hover:border-amber-400/70 hover:bg-zinc-800 sm:min-h-44 sm:p-5"
+//     >
+//       <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-xl bg-zinc-200 p-3 sm:h-32 sm:w-32">
+//         <img
+//           src={categoryItem.image}
+//           alt={categoryItem.title}
+//           className="h-full w-full object-contain"
+//         />
+//       </div>
+//       <div className="flex min-w-0 flex-1 flex-col items-start justify-center text-right">
+//         <h3 className="text-xl font-bold text-white sm:text-2xl">
+//           {categoryItem.title}
+//         </h3>
+//         {/* <p className="mt-1 text-sm text-zinc-400 sm:text-base">
+//           {categoryItem.description}
+//         </p> */}
+//         <span className="mt-4 inline-flex items-center rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-950 transition group-hover:bg-amber-300">
+//           اذهب للتسوق ←
+//         </span>
+//       </div>
+//     </Link>
+//   ))}
+// </div>

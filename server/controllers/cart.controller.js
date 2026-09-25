@@ -1,5 +1,6 @@
 const Cart = require("../models/cartSchema");
 const asyncWrapper = require("../middleware/asyncWrapper");
+const Event = require("../models/eventSchema");
 
 const addtoCart = asyncWrapper(async (req, res) => {
   const { productId, userId, count } = req.body;
@@ -9,6 +10,19 @@ const addtoCart = asyncWrapper(async (req, res) => {
     { $inc: { "products.$.count": count } },
     { new: true },
   );
+  const existingEvent = await Event.findOne({
+    userId,
+    productId,
+    type: "add_to_cart",
+  });
+
+  if (!existingEvent) {
+    await Event.create({
+      userId,
+      productId,
+      type: "add_to_cart",
+    });
+  }
 
   if (!updatedCart) {
     const cartExist = await Cart.findOne({ userId });

@@ -146,7 +146,7 @@ export default function Cart() {
       aria-label={`Quantity: ${item.count}`}
     >
       <button
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900 text-lg font-medium text-zinc-200 transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900 text-lg font-medium text-zinc-200 transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-zinc-900"
         type="button"
         aria-label={`Decrease quantity of ${item.productId.name}`}
         onClick={() => editCountCart("decrease", item.productId._id)}
@@ -154,14 +154,17 @@ export default function Cart() {
       >
         −
       </button>
+
       <span className="flex h-9 min-w-10 items-center justify-center rounded-lg border border-zinc-600 bg-zinc-950 px-2 text-sm font-semibold text-white">
         {item.count}
       </span>
+
       <button
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900 text-lg font-medium text-zinc-200 transition hover:bg-zinc-700"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900 text-lg font-medium text-zinc-200 transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-zinc-900"
         type="button"
         aria-label={`Increase quantity of ${item.productId.name}`}
         onClick={() => editCountCart("increase", item.productId._id)}
+        disabled={item.count >= (item.productId.stock ?? 0)}
       >
         +
       </button>
@@ -199,7 +202,7 @@ export default function Cart() {
   const FavButton = ({ product, className }) => (
     <button
       onClick={() => addtoFavourites(product._id)}
-      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-zinc-600 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-200 transition hover:border-red-400 hover:bg-red-500/10 hover:text-red-200 ${className}`}
+      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-zinc-600 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-200 transition hover:border-pink-400 hover:bg-pink-500/10 hover:text-pink-200 ${className}`}
     >
       <HeartAdd size={20} />
       <span className="text-sm md:hidden">نقل إلى المفضلة</span>
@@ -351,7 +354,7 @@ export default function Cart() {
                       <QuantityControls item={item} />
                       <RemoveButton product={item.productId} />
                     </div>
-                    <WhatsAppButton
+                    {/* <WhatsAppButton
                       message={productWhatsAppMessage({
                         name: item.productId.name,
                         price: item.productId.price,
@@ -367,7 +370,7 @@ export default function Cart() {
                     >
                       <FaPhone className="h-5 w-5" aria-hidden="true" />
                       <span>الاتصال عبر الهاتف</span>
-                    </a>
+                    </a> */}
                     <FavButton
                       className="mt-3 w-full"
                       product={item.productId}

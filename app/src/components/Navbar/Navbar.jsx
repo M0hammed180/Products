@@ -37,10 +37,9 @@ import api from "../api";
 import { getGuestCart, getGuestFavourites } from "../../utils/guestCart";
 import { FaHome } from "react-icons/fa";
 
-const homeCategories = ["tshirts", "pantalons", "shoes"];
 const categoryLabels = {
-  tshirts: "تيشيرتات",
-  pantalons: "بناطيل",
+  clothes: "ملابس",
+  electronics: "اجهزه",
   shoes: "أحذية",
 };
 
@@ -58,7 +57,7 @@ export default function Navbar() {
   const { role, isAuthenticated, avatar, userName, userId } = useSelector(
     (state) => state.user,
   );
-  const { search, category, searchOrder, cartCount } = useSelector(
+  const { search, category, searchOrder, cartCount, categorys } = useSelector(
     (state) => state.page,
   );
   const isSidebarLinkActive = (path) => location.pathname === path;
@@ -184,14 +183,17 @@ export default function Navbar() {
     }
   };
   useEffect(() => {
-    fetchUserCart();
-    fetchUserFavourites();
-  }, []);
+    if (role == "user") {
+      fetchUserCart();
+      fetchUserFavourites();
+    }
+  }, [role]);
+
   return (
     <>
       {role == "admin" ? (
         <>
-          <nav className="fixed left-0 top-0 z-30 w-full border-b border-zinc-200/70 bg-white/70 backdrop-blur-md dark:border-zinc-700/70 dark:bg-zinc-900">
+          <nav className="fixed left-0 top-0 z-30 w-full border-b border-zinc-200/70 bg-white/70 backdrop-blur-md dark:border-zinc-700/70 dark:bg-zinc-900 ">
             <div className="px-3 py-3 lg:px-5 lg:pl-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center justify-start">
@@ -200,7 +202,7 @@ export default function Navbar() {
                     aria-expanded={isSidebarOpen}
                     aria-controls="sidebar"
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="lg:hidden mr-2 text-zinc-600 hover:text-zinc-900 cursor-pointer p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 focus:bg-zinc-100 focus:ring-2 focus:ring-zinc-100 rounded"
+                    className="lg:hidden mr-2 text-zinc-400 hover:text-zinc-900 cursor-pointer p-2 hover:bg-zinc-700 dark:hover:bg-zinc-700 focus:bg-zinc-700 focus:ring-2 focus:ring-zinc-700 rounded"
                   >
                     <svg
                       id="toggleSidebarMobileHamburger"
@@ -233,38 +235,26 @@ export default function Navbar() {
                     to="/"
                     className="text-xl font-bold flex items-center dark:text-white text-zinc-900 lg:ml-2.5"
                   >
-                    <span className="self-center whitespace-nowrap">شياكة</span>
+                    <span className="self-center whitespace-nowrap md:block hidden">
+                      شياكة
+                    </span>
                   </Link>
-                  {(location.pathname === "/products_admin" ||
-                    location.pathname === "/users" ||
-                    location.pathname === "/orders") && (
+                  {location.pathname === "/products_admin" ||
+                  location.pathname === "/users" ||
+                  location.pathname === "/orders" ? (
                     <form
                       onSubmit={(e) => e.preventDefault()}
-                      className="hidden lg:flex lg:pl-32 lg:gap-3 lg:items-center "
+                      className="flex lg:pl-32 gap-3 items-center not-md:mr-5"
                     >
                       <label htmlFor="topbar-search" className="sr-only">
                         Search
                       </label>
                       <div className="mt-1 relative lg:w-64">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg
-                            className="w-5 h-5 text-zinc-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                              clipRule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
                         <input
                           type="text"
                           name="search"
                           id="topbar-search"
-                          className="block w-full rounded-lg border border-zinc-300 bg-zinc-50 p-2.5 pl-10 dark:text-white text-zinc-900 focus:border-amber-600 focus:ring-amber-600 dark:border-zinc-600 dark:bg-zinc-900  sm:text-sm"
+                          className="block w-full rounded-lg border border-zinc-300 bg-zinc-50 p-2.5 pl-10 dark:text-white text-zinc-900 focus:border-amber-600 focus:ring-amber-600 dark:border-zinc-600 dark:bg-zinc-900  text-base"
                           placeholder="بحث"
                           onChange={(e) => {
                             dispatch(setSearch(e.target.value));
@@ -282,82 +272,58 @@ export default function Navbar() {
                           className="rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
                         >
                           <option value="">كل الأقسام</option>
-                          <option value="tshirts">تيشيرتات</option>
-                          <option value="pantalons">بناطيل</option>
-                          <option value="shoes">أحذية</option>
+                          {categorys.map((c) => (
+                            <option key={c.id} value={c.id} className="">
+                              <p className="capitalize">{c.title}</p>
+                            </option>
+                          ))}
                         </select>
                       ) : (
                         <button
                           type="button"
                           onClick={() => dispatch(setSearchOrder(!searchOrder))}
-                          className="rounded-full bg-white p-3  text-xs font-semibold text-zinc-950 hover:bg-zinc-200"
+                          className="rounded-full bg-white p-2  text-xs font-semibold text-zinc-950 hover:bg-zinc-200"
                         >
-                          <SearchNormal2 />
+                          <svg
+                            className="w-5 h-5 text-zinc-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                              clipRule="evenodd"
+                            ></path>
+                          </svg>
                         </button>
                       )}
                     </form>
+                  ) : (
+                    <div className="w-full flex items-center justify-between">
+                      <Link
+                        to="/"
+                        className="text-xl font-bold flex items-center dark:text-white text-zinc-900 lg:ml-2.5 md:hidden mr-5"
+                      >
+                        <span className="self-center whitespace-nowrap ">
+                          شياكة
+                        </span>
+                      </Link>
+                    </div>
                   )}
                 </div>
                 <div className="flex items-center">
-                  <button
-                    id="toggleSidebarMobileSearch"
-                    type="button"
-                    className="lg:hidden text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-700 p-2 rounded-lg"
+                  {" "}
+                  <Link
+                    to="/admin_orders"
+                    className={`group flex items-center rounded-lg p-2 text-base font-normal transition-colors ${
+                      isSidebarLinkActive("/admin_orders")
+                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+                        : "text-zinc-900 hover:bg-zinc-100 dark:text-white dark:hover:bg-zinc-700"
+                    }`}
                   >
-                    <span className="sr-only">Search</span>
-                    <svg
-                      className="w-6 h-6"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                  </button>
-                  <button
-                    onClick={logOut}
-                    className="px-4 py-2 mt-2 text-sm font-semibold bg-red-600 text-white rounded-full dark:bg-red-900 dark:hover:bg-red-800 md:mt-0 md:ml-4 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-200 dark:focus:ring-red-900 focus:shadow-outline"
-                    to="/"
-                  >
-                    تسجيل الخروج
-                  </button>
-                  {/* Theme Toggle Button */}
-                  <button
-                    id="theme-toggle"
-                    type="button"
-                    onClick={toggleTheme}
-                    className="text-zinc-500 bg-zinc-200 dark:text-zinc-400 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 focus:outline-none focus:ring-4 focus:ring-zinc-200 dark:focus:ring-zinc-700 rounded-full text-sm p-2.5 md:ml-5 not-md:hidden "
-                  >
-                    {/* Dark Icon (Moon) - Shows when currently in light mode */}
-                    <svg
-                      id="theme-toggle-dark-icon"
-                      className={`w-5 h-5 ${isDarkMode ? "hidden" : "block"}`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                    </svg>
-
-                    {/* Light Icon (Sun) - Shows when currently in dark mode */}
-                    <svg
-                      id="theme-toggle-light-icon"
-                      className={`w-5 h-5 ${isDarkMode ? "block" : "hidden"}`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                  </button>
+                    <ReceiptItem />{" "}
+                  </Link>
                 </div>
               </div>
             </div>
@@ -368,9 +334,12 @@ export default function Navbar() {
             className={`fixed right-0 top-16 z-20 flex h-[calc(100vh-4rem)] w-64 shrink-0 flex-col border-l border-zinc-200/70 bg-white/80 text-right backdrop-blur-md transition-transform duration-200 dark:border-zinc-700/70 dark:bg-zinc-900 ${isSidebarOpen ? "translate-x-0" : "translate-x-full pointer-events-none"} lg:translate-x-0 lg:pointer-events-auto`}
             aria-label="القائمة الجانبية"
           >
-            <div className="relative flex min-h-0 flex-1 flex-col bg-transparent pt-0">
+            <div
+              className="relative flex min-h-0 flex-1 flex-col bg-transparent pt-0"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
               <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-                <div className="flex-1 space-y-1 divide-y bg-transparent px-3 dark:divide-zinc-700">
+                <div className="flex-1 space-y-1 divide-y bg-transparent px-3 dark:divide-zinc-700 flex flex-col justify-between">
                   <ul className="space-y-2 pb-2">
                     <li>
                       <Link
@@ -397,22 +366,10 @@ export default function Navbar() {
                       >
                         <Additem />
                         <span className="mr-3 flex-1 whitespace-nowrap">
-                          Add Product
+                          اضافة منتج
                         </span>
                       </Link>
                     </li>
-                    {/* <li>
-                        <Link
-                          to="/add_category"
-                          rel="noreferrer"
-                          className="text-base dark:text-white text-zinc-900 font-normal rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 flex items-center p-2 group"
-                        >
-                          <AddCircle />
-                          <span className="mr-3 flex-1 whitespace-nowrap">
-                            Add Category
-                          </span>
-                        </Link>
-                      </li> */}
                     <li>
                       <Link
                         to="/add_user"
@@ -424,7 +381,7 @@ export default function Navbar() {
                       >
                         <UserAdd4 />
                         <span className="mr-3 flex-1 whitespace-nowrap">
-                          Add User
+                          اضافة مستخدم
                         </span>
                       </Link>
                     </li>
@@ -439,21 +396,10 @@ export default function Navbar() {
                       >
                         <Profile2user />{" "}
                         <span className="mr-3 flex-1 whitespace-nowrap">
-                          Users
+                          المستخدمين
                         </span>
                       </Link>
                     </li>
-                    {/* <li>
-                        <Link
-                          to="/categorys_admin"
-                          className="text-base dark:text-white text-zinc-900 font-normal rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 flex items-center p-2 group"
-                        >
-                          <Category />
-                          <span className="mr-3 flex-1 whitespace-nowrap">
-                            Categorys
-                          </span>
-                        </Link>
-                      </li> */}
                     <li>
                       <Link
                         to="/products_admin"
@@ -465,15 +411,15 @@ export default function Navbar() {
                       >
                         <ForwardItem />
                         <span className="mr-3 flex-1 whitespace-nowrap">
-                          Products
+                          المنتجات
                         </span>
                       </Link>
                     </li>
                     <li>
                       <Link
-                        to="/orders"
+                        to="/admin_orders"
                         className={`group flex items-center rounded-lg p-2 text-base font-normal transition-colors ${
-                          isSidebarLinkActive("/orders")
+                          isSidebarLinkActive("/admin_orders")
                             ? "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
                             : "text-zinc-900 hover:bg-zinc-100 dark:text-white dark:hover:bg-zinc-700"
                         }`}
@@ -485,6 +431,19 @@ export default function Navbar() {
                       </Link>
                     </li>
                   </ul>
+                  {userId && (
+                    <div className="border-t border-white/10 p-4">
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          logOut();
+                        }}
+                        className="w-full rounded-full bg-red-500/80 px-4 py-3 text-white transition hover:bg-red-600 flex items-center gap-2 justify-center"
+                      >
+                        <Logout6 /> تسجيل الخروج
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -629,17 +588,17 @@ export default function Navbar() {
                                     الكل
                                   </p>
                                 </button>
-                                {homeCategories.map((category) => (
+                                {categorys.map((category) => (
                                   <button
-                                    key={category}
+                                    key={category.id}
                                     onClick={() => {
-                                      dispatch(setCategoty(category));
+                                      dispatch(setCategoty(category.id));
                                       setIsDropdownOpen(false);
                                     }}
                                     className="rounded-xl p-2 text-right text-zinc-800 transition hover:bg-amber-400/20"
                                   >
                                     <p className="font-semibold text-white">
-                                      {categoryLabels[category]}
+                                      {category.title}
                                     </p>
                                   </button>
                                 ))}
@@ -740,17 +699,17 @@ export default function Navbar() {
                                     الكل
                                   </p>
                                 </button>
-                                {homeCategories.map((category) => (
+                                {categorys.map((category) => (
                                   <button
-                                    key={category}
+                                    key={category.id}
                                     onClick={() => {
-                                      dispatch(setCategoty(category));
+                                      dispatch(setCategoty(category.id));
                                       setIsDropdownOpen(false);
                                     }}
                                     className="rounded-xl p-2 text-right text-zinc-800 transition hover:bg-amber-400/20"
                                   >
                                     <p className="font-semibold text-white">
-                                      {categoryLabels[category]}
+                                      {category.title}
                                     </p>
                                   </button>
                                 ))}

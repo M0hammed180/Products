@@ -4,6 +4,7 @@ import Loading from "../../Elements/Loading";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearch } from "../../../Redux/pageSlice";
+import ProductCard from "../../Elements/ProductCard";
 
 export default function AdminProducts() {
   const dispatch = useDispatch();
@@ -18,6 +19,7 @@ export default function AdminProducts() {
     totalProducts: 0,
   });
   const { search, category } = useSelector((state) => state.page);
+  const { role } = useSelector((state) => state.user);
 
   const fetchProducts = async () => {
     try {
@@ -84,17 +86,7 @@ export default function AdminProducts() {
 
   return (
     <div>
-      {/* <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row">
-        <input
-          type="search"
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Search products..."
-          className="rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white flex-1"
-        />
-  
-      </div> */}
-      <div className="flex flex-col">
+      <div className="md:flex flex-col hidden">
         <div className="overflow-x-auto sm:mx-0.5 lg:mx-0.5">
           <div className="py-2 inline-block min-w-full ">
             <div className="overflow-hidden">
@@ -141,7 +133,7 @@ export default function AdminProducts() {
                         index % 2 === 0 ? "bg-zinc-700" : "bg-zinc-900"
                       }`}
                     >
-                      <td className="whitespace-nowrap rounded-l-lg px-6 py-4 text-sm font-medium">
+                      <td className="whitespace-nowrap rounded-r-lg px-6 py-4 text-sm font-medium">
                         <Link to={`/edit_product/${p._id}`}>
                           <div className="flex gap-[0.5px]">
                             {p?.images?.map((i) => (
@@ -175,7 +167,7 @@ export default function AdminProducts() {
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-light">
                         {p.stock}
                       </td>
-                      <td className="whitespace-nowrap rounded-r-lg px-6 py-4 text-sm font-light">
+                      <td className="whitespace-nowrap rounded-l-lg px-6 py-4 text-sm font-light">
                         <div className="flex gap-2">
                           <Link
                             to={`/edit_product/${p._id}`}
@@ -199,6 +191,26 @@ export default function AdminProducts() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="grid grid-cols-2 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:hidden mt-10 px-5">
+        {filteredProducts.map((product) => {
+          return (
+            <Link
+              key={product._id}
+              to={`/edit_product/${product._id}`}
+              className="min-w-0"
+            >
+              <ProductCard
+                image={product.images}
+                name={product.name}
+                price={product.price}
+                discountPrice={product.discountPrice}
+                id={product._id}
+                role={role}
+              />
+            </Link>
+          );
+        })}
       </div>
       <div className="flex items-center justify-between px-4 py-4 text-sm text-zinc-700 dark:text-zinc-300">
         <span>

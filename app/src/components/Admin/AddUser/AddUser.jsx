@@ -64,8 +64,6 @@ export default function AddUser() {
         {/* Left Pane */}
         <div className="w-full flex items-center justify-center">
           <div className="w-full max-w-lg rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
-
-
             <form
               onSubmit={handleRegister}
               className="space-y-4 flex flex-col justify-center items-center w-full"
@@ -92,8 +90,7 @@ export default function AddUser() {
                   hidden
                 />
               </div>
-              <div className="flex gap-4">
-                <div className="flex flex-col gap-2">
+              <div className="flex flex-col w-full gap-2">
                   <div>
                     <label
                       htmlFor="username"
@@ -124,8 +121,7 @@ export default function AddUser() {
                       className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                     />
                   </div>
-                </div>
-                <div className="flex flex-col gap-2">
+              
                   <div>
                     <label
                       htmlFor="email"
@@ -156,7 +152,7 @@ export default function AddUser() {
                       className="mt-1 w-full rounded-md border border-zinc-300 bg-white p-2 text-zinc-900 outline-none transition-colors duration-300 placeholder:text-zinc-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                     />
                   </div>
-                </div>
+                
               </div>
 
               <div className=" flex justify-around items-center w-full">
