@@ -58,6 +58,6 @@ mongoose
     console.log(`error with connect db is ${e}`);
   });
 
-server.listen(process.env.PORT,"0.0.0.0", () => {
+server.listen(process.env.PORT, () => {
   console.log("lam listening in port" + " " + process.env.PORT);
 });

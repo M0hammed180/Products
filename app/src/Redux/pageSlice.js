@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import clothes from "../../public/photos/clothes.jpg";
-import electronics from "../../public/photos/electronics.jpg";
-import shoes from "../../public/photos/shoes.jpg";
+import clothes from "../../public/photos/clothes.webp";
+import electronics from "../../public/photos/electronics.webp";
+import shoes from "../../public/photos/shoes.webp";
 
 const StoredPage = {
   search: "",

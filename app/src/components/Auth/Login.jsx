@@ -12,12 +12,16 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { isAuthenticated } = useSelector((state) => state.user);
+  const { isAuthenticated, userId } = useSelector((state) => state.user);
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (userId) syncGuestDataToServer(userId, dispatch);
+  }, [userId]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
