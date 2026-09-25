@@ -5,6 +5,7 @@ import { setUserData } from "../../Redux/userSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../api";
+import { syncGuestDataToServer } from "../../utils/guestCart";
 
 export default function Login() {
   const dispatch = useDispatch();
