@@ -276,11 +276,11 @@ export default function ProductCard({
                   to={`/edit_product/${id}`}
                   className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-zinc-200 flex items-center justify-center gap-2 flex-1 "
                 >
-                  <Edit /> Edit
+                  <Edit />
                 </Link>
                 <button
                   type="button"
-                  className="rounded-full bg-red-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 "
+                  className="rounded-full bg-red-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 flex-1"
                   onClick={() => deleteProduct()}
                 >
                   <Trash9 />
