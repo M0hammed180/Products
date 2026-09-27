@@ -132,9 +132,7 @@ export default function AdminOrders() {
         {/* Header */}
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
-            <p className="text-sm text-zinc-400">تابع وراجع طلباتك</p>
-
-            <h1 className="mt-1 text-2xl font-bold sm:text-3xl">طلباتي</h1>
+            <h1 className="mt-1 text-2xl font-bold sm:text-3xl">الطلبات</h1>
           </div>
 
           <span className="shrink-0 rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-zinc-300">
@@ -146,17 +144,6 @@ export default function AdminOrders() {
           /* Empty */
           <div className="rounded-2xl border border-zinc-700 bg-zinc-800 p-8 text-center shadow-xl">
             <h2 className="text-lg font-semibold">لا توجد طلبات بعد</h2>
-
-            <p className="mt-2 text-sm text-zinc-400">
-              ستظهر طلباتك هنا بعد تأكيدها.
-            </p>
-
-            <Link
-              to="/products"
-              className="mt-5 inline-flex rounded-xl bg-amber-400 px-4 py-2.5 font-semibold text-black transition hover:bg-amber-500"
-            >
-              تصفح المنتجات
-            </Link>
           </div>
         ) : (
           <>
