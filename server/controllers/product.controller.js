@@ -7,9 +7,18 @@ const Cart = require("../models/cartSchema");
 const Order = require("../models/orderSchema");
 
 const addProduct = asyncWrapper(async (req, res) => {
-  const { name, description, price, category, stock, size } = req.body;
+  const { name, description, price, category, stock } = req.body;
 
   const images = req.files?.map((file) => file.path) || [];
+
+  let size = [];
+
+  if (req.body.size) {
+    size =
+      typeof req.body.size === "string"
+        ? JSON.parse(req.body.size)
+        : req.body.size;
+  }
 
   const newProduct = await product.create({
     name,
@@ -153,9 +162,6 @@ const showProductDetails = asyncWrapper(async (req, res) => {
   }
 
   const productDea = await product.findById(id);
-  const sameProducts = await product
-    .find({ category: productDea.category, _id: { $ne: id } })
-    .limit(6);
 
   if (!productDea) {
     return res.status(404).json({
@@ -163,6 +169,13 @@ const showProductDetails = asyncWrapper(async (req, res) => {
       message: "Product not found",
     });
   }
+
+  const sameProducts = await product
+    .find({
+      category: productDea.category,
+      _id: { $ne: id },
+    })
+    .limit(6);
 
   return res.status(200).json({
     success: true,
