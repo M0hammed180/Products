@@ -75,31 +75,34 @@ export default function Navbar() {
 
   // Initialize theme on mount
   useEffect(() => {
-    const isDark =
-      localStorage.getItem("color-theme") === "dark" ||
-      (!("color-theme" in localStorage) &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches);
+    // const isDark =
+    //   localStorage.getItem("color-theme") === "dark" ||
+    //   (!("color-theme" in localStorage) &&
+    //     window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-    setIsDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    // setIsDarkMode(isDark);
+    // if (isDark) {
+    //   document.documentElement.classList.add("dark");
+    // } else {
+    //   document.documentElement.classList.remove("dark");
+    // }
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("color-theme", "dark");
+    setIsDarkMode(true);
   }, []);
 
   // Toggle theme handler
-  const toggleTheme = () => {
-    if (isDarkMode) {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("color-theme", "light");
-      setIsDarkMode(false);
-    } else {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("color-theme", "dark");
-      setIsDarkMode(true);
-    }
-  };
+  // const toggleTheme = () => {
+  //   if (isDarkMode) {
+  //     document.documentElement.classList.remove("dark");
+  //     localStorage.setItem("color-theme", "light");
+  //     setIsDarkMode(false);
+  //   } else {
+  //     document.documentElement.classList.add("dark");
+  //     localStorage.setItem("color-theme", "dark");
+  //     setIsDarkMode(true);
+  //   }
+  // };
 
   // Click-away listener for dropdown
   useEffect(() => {
