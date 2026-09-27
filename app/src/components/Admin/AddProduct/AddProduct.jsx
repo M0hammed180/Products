@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Add, XCircle } from "reicon-react";
 import api from "../../api";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function AddProduct() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -29,30 +31,22 @@ export default function AddProduct() {
       return;
     }
 
-    const newUrls = selectedFiles.map((file) =>
-      URL.createObjectURL(file)
-    );
+    const newUrls = selectedFiles.map((file) => URL.createObjectURL(file));
 
-    setImages((prevImages) => [
-      ...prevImages,
-      ...selectedFiles,
-    ]);
+    setImages((prevImages) => [...prevImages, ...selectedFiles]);
 
-    setImageUrls((prevUrls) => [
-      ...prevUrls,
-      ...newUrls,
-    ]);
+    setImageUrls((prevUrls) => [...prevUrls, ...newUrls]);
   };
 
   const handleRemoveImage = (index) => {
     URL.revokeObjectURL(imageUrls[index]);
 
     setImages((currentImages) =>
-      currentImages.filter((_, imageIndex) => imageIndex !== index)
+      currentImages.filter((_, imageIndex) => imageIndex !== index),
     );
 
     setImageUrls((currentUrls) =>
-      currentUrls.filter((_, imageIndex) => imageIndex !== index)
+      currentUrls.filter((_, imageIndex) => imageIndex !== index),
     );
   };
 
@@ -71,7 +65,7 @@ export default function AddProduct() {
     setSizes((currentSizes) =>
       checked
         ? [...currentSizes, value]
-        : currentSizes.filter((size) => size !== value)
+        : currentSizes.filter((size) => size !== value),
     );
   };
 
@@ -92,8 +86,8 @@ export default function AddProduct() {
         JSON.stringify(
           sizes.map((size) => ({
             size,
-          }))
-        )
+          })),
+        ),
       );
 
       // send images as multipart/form-data
@@ -103,7 +97,7 @@ export default function AddProduct() {
 
       const res = await api.post("product/", data);
 
-      console.log(res.data);
+      navigate("/products_admin");
     } catch (error) {
       console.log(error);
     }
@@ -113,10 +107,7 @@ export default function AddProduct() {
     <div>
       <div className="flex items-center justify-center md:p-12">
         <div className="mx-auto w-full max-w-137.5 md:bg-zinc-900 text-white md:rounded-3xl">
-          <form
-            className="py-6 px-9"
-            onSubmit={handleSubmit}
-          >
+          <form className="py-6 px-9" onSubmit={handleSubmit}>
             {imageUrls.length > 0 ? (
               <div className="flex gap-2 mb-2">
                 {imageUrls.map((url, index) => (
@@ -135,10 +126,7 @@ export default function AddProduct() {
                       onClick={() => handleRemoveImage(index)}
                       className="absolute -top-3 -left-3 rounded-full backdrop-blur-sm"
                     >
-                      <XCircle
-                        color="red"
-                        size={30}
-                      />
+                      <XCircle color="red" size={30} />
                     </button>
                   </div>
                 ))}
@@ -295,9 +283,7 @@ export default function AddProduct() {
                 onChange={handleChange}
                 className="w-full rounded-md border border-[#e0e0e0] bg-zinc-800 px-6 py-3 text-base font-medium text-white outline-none focus:border-[#6A64F1] focus:shadow-md"
               >
-                <option value="">
-                  Select a category
-                </option>
+                <option value="">Select a category</option>
 
                 {categorys.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -316,34 +302,29 @@ export default function AddProduct() {
               </label>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {[
-                  "Small",
-                  "Medium",
-                  "Large",
-                  "XL",
-                  "2XL",
-                  "3XL",
-                ].map((size) => (
-                  <label
-                    key={size}
-                    className={`flex cursor-pointer items-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition ${
-                      sizes.includes(size)
-                        ? "border-[#6A64F1] bg-[#6A64F1]/20 text-white"
-                        : "border-[#e0e0e0] bg-zinc-800 text-zinc-300"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      name="sizes"
-                      value={size}
-                      checked={sizes.includes(size)}
-                      onChange={handleSizeChange}
-                      className="accent-[#6A64F1]"
-                    />
+                {["Small", "Medium", "Large", "XL", "2XL", "3XL"].map(
+                  (size) => (
+                    <label
+                      key={size}
+                      className={`flex cursor-pointer items-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition ${
+                        sizes.includes(size)
+                          ? "border-[#6A64F1] bg-[#6A64F1]/20 text-white"
+                          : "border-[#e0e0e0] bg-zinc-800 text-zinc-300"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="sizes"
+                        value={size}
+                        checked={sizes.includes(size)}
+                        onChange={handleSizeChange}
+                        className="accent-[#6A64F1]"
+                      />
 
-                    {size}
-                  </label>
-                ))}
+                      {size}
+                    </label>
+                  ),
+                )}
               </div>
             </div>
 
