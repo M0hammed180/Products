@@ -63,6 +63,7 @@ export default function ProductCard({
   role,
   forShow,
   stock,
+  fetchProducts,
 }) {
   const dispatch = useDispatch();
 
@@ -79,6 +80,7 @@ export default function ProductCard({
 
     try {
       await api.delete(`product/${id}`);
+      fetchProducts();
     } catch (error) {
       console.log(error);
       window.alert("Unable to delete the product. Please try again.");

@@ -207,6 +207,7 @@ export default function AdminProducts() {
                 discountPrice={product.discountPrice}
                 id={product._id}
                 role={role}
+                fetchProducts={fetchProducts}
               />
             </Link>
           );

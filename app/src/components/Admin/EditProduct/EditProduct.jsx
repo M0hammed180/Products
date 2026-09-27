@@ -24,6 +24,8 @@ export default function EditProduct() {
   const [sizes, setSizes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const { categorys } = useSelector((state) => state.page);
 
   useEffect(() => {
@@ -117,6 +119,25 @@ export default function EditProduct() {
       window.alert("Unable to update the product. Please try again.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteProduct = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product? This action cannot be undone.",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setLoadingDelete(true);
+      await api.delete(`product/${id}`);
+      navigate("/products_admin");
+    } catch (error) {
+      console.log(error);
+      window.alert("Unable to delete the product. Please try again.");
+    } finally {
+      setLoadingDelete(false);
     }
   };
 
@@ -312,6 +333,14 @@ export default function EditProduct() {
             className="w-full rounded-md bg-white px-8 py-3 font-semibold text-zinc-950 hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save Changes"}
+          </button>
+          <button
+            type="button"
+            onClick={() => deleteProduct()}
+            disabled={saving}
+            className="w-full rounded-md bg-white px-8 py-3 font-semibold text-zinc-950 hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loadingDelete ? "Deleting..." : "Delete"}
           </button>
         </form>
       </div>
