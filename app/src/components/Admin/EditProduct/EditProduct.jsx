@@ -337,7 +337,7 @@ export default function EditProduct() {
           <button
             type="button"
             onClick={() => deleteProduct()}
-            disabled={saving}
+            disabled={loadingDelete}
             className="w-full rounded-md bg-white px-8 py-3 font-semibold text-zinc-950 hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loadingDelete ? "Deleting..." : "Delete"}

@@ -17,6 +17,7 @@ export default function AddProduct() {
   const [images, setImages] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
   const [sizes, setSizes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const { categorys } = useSelector((state) => state.page);
 
@@ -71,7 +72,7 @@ export default function AddProduct() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    setLoading(true);
     try {
       const data = new FormData();
 
@@ -100,6 +101,8 @@ export default function AddProduct() {
       navigate("/products_admin");
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -331,9 +334,10 @@ export default function AddProduct() {
             <div>
               <button
                 type="submit"
+                disabled={loading}
                 className="hover:shadow-form w-full rounded-md bg-[#6A64F1] py-3 px-8 text-center text-base font-semibold text-white outline-none"
               >
-                Add
+                {loading ? "Adding..." : "Add"}
               </button>
             </div>
           </form>
